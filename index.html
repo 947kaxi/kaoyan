@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="卡西考研备战仓">
+<title>卡西的考研备战仓</title>
+<style>
+:root {
+  --bg: #0f172a; --bg-card: #1e293b; --bg-nav: #0b1120;
+  --text: #e2e8f0; --text-secondary: #94a3b8; --text-muted: #64748b;
+  --accent: #38bdf8; --accent2: #818cf8; --accent3: #f472b6;
+  --success: #4ade80; --warning: #fbbf24; --danger: #f87171;
+  --border: #334155; --radius: 14px; --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --nav-width: 200px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+/* 导航栏 */
+nav { width:var(--nav-width); min-width:var(--nav-width); background:var(--bg-nav); height:100vh; position:fixed; left:0; top:0; display:flex; flex-direction:column; border-right:1px solid var(--border); z-index:100; overflow-y:auto; }
+nav .logo { padding:20px 16px; border-bottom:1px solid var(--border); }
+nav .logo h1 { font-size:16px; font-weight:700; background:linear-gradient(135deg, var(--accent), var(--accent3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+nav .logo .sub { font-size:11px; color:var(--text-muted); margin-top:4px; }
+nav ul { list-style:none; padding:8px 0; flex:1; }
+nav ul li a { display:flex; align-items:center; gap:10px; padding:12px 16px; color:var(--text-secondary); text-decoration:none; font-size:14px; transition:all 0.2s; border-left:3px solid transparent; cursor:pointer; }
+nav ul li a:hover { background:rgba(56,189,248,0.08); color:var(--text); }
+nav ul li a.active { background:rgba(56,189,248,0.12); color:var(--accent); border-left-color:var(--accent); font-weight:600; }
+nav ul li a .nav-icon { font-size:18px; width:24px; text-align:center; }
+/* 主内容 */
+main { margin-left:var(--nav-width); flex:1; padding:24px; max-width:1100px; width:100%; }
+.page { display:none; }
+.page.active { display:block; }
+/* 通用 */
+.card { background:var(--bg-card); border-radius:var(--radius); padding:20px; margin-bottom:20px; border:1px solid var(--border); box-shadow:var(--shadow); }
+.card h2 { font-size:18px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.card h3 { font-size:15px; margin-bottom:10px; color:var(--text-secondary); }
+.grid-2 { display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; }
+input, textarea, select { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); font-size:14px; font-family:inherit; outline:none; transition:border 0.2s; }
+input:focus, textarea:focus, select:focus { border-color:var(--accent); }
+textarea { resize:vertical; min-height:80px; }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:500; cursor:pointer; transition:all 0.2s; background:var(--accent); color:#0f172a; }
+.btn:hover { opacity:0.9; transform:translateY(-1px); }
+.btn-sm { padding:5px 12px; font-size:12px; }
+.btn-xs { padding:3px 8px; font-size:11px; }
+.btn-outline { background:transparent; border:1px solid var(--accent); color:var(--accent); }
+.btn-success { background:var(--success); color:#0f172a; }
+.btn-danger { background:var(--danger); color:#fff; }
+.btn-warning { background:var(--warning); color:#0f172a; }
+.btn-ghost { background:transparent; color:var(--text-secondary); border:1px solid var(--border); }
+.progress-bar { height:10px; background:var(--bg); border-radius:5px; overflow:hidden; margin:8px 0; }
+.progress-fill { height:100%; border-radius:5px; transition:width 0.5s ease; background:linear-gradient(90deg, var(--accent), var(--accent2)); }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:11px; font-weight:500; }
+.tag-blue { background:rgba(56,189,248,0.2); color:var(--accent); }
+.tag-green { background:rgba(74,222,128,0.2); color:var(--success); }
+.tag-red { background:rgba(248,113,113,0.2); color:var(--danger); }
+.tag-yellow { background:rgba(251,191,36,0.2); color:var(--warning); }
+.tag-purple { background:rgba(167,139,250,0.2); color:#a78bfa; }
+.stat-card { text-align:center; padding:16px; }
+.stat-card .value { font-size:32px; font-weight:700; background:linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.stat-card .label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+.badge { display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; border-radius:10px; background:var(--danger); color:#fff; font-size:11px; padding:0 6px; }
+.flex-row { display:flex; align-items:center; gap:12px; }
+.flex-between { display:flex; justify-content:space-between; align-items:center; }
+.flex-wrap { flex-wrap:wrap; }
+.gap-sm { gap:8px; }
+.gap-xs { gap:4px; }
+.mt-sm { margin-top:8px; }
+.mt-md { margin-top:16px; }
+.mb-sm { margin-bottom:8px; }
+.mb-md { margin-bottom:16px; }
+.text-sm { font-size:12px; }
+.text-muted { color:var(--text-muted); }
+.text-secondary { color:var(--text-secondary); }
+.text-center { text-align:center; }
+.text-right { text-align:right; }
+.w-full { width:100%; }
+/* 倒计时 */
+.countdown-area { text-align:center; padding:30px 20px; }
+.countdown { font-size:56px; font-weight:800; background:linear-gradient(135deg, var(--accent), var(--accent3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.countdown-sub { color:var(--text-secondary); font-size:14px; margin-top:6px; }
+/* 快捷链接 */
+.quick-links { display:flex; gap:12px; flex-wrap:wrap; }
+.quick-link { display:flex; align-items:center; gap:8px; padding:12px 16px; background:var(--bg); border-radius:var(--radius-sm); text-decoration:none; color:var(--text); font-size:13px; border:1px solid var(--border); transition:all 0.2s; }
+.quick-link:hover { border-color:var(--accent); background:rgba(56,189,248,0.08); }
+.quick-link .icon { font-size:20px; }
+/* 单词卡 */
+.word-card { background:var(--bg); border-radius:var(--radius-sm); padding:14px; margin-bottom:10px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+.word-card .word { font-size:18px; font-weight:700; color:var(--accent); }
+.word-card .phonetic { font-size:13px; color:var(--text-secondary); margin:0 8px; }
+.word-card .meaning { font-size:14px; color:var(--text); }
+.word-card .actions { display:flex; gap:6px; flex-shrink:0; }
+.word-known { opacity:0.5; border-left:3px solid var(--success); }
+.word-unknown { border-left:3px solid var(--danger); }
+/* 选择题 */
+.quiz-question { font-size:15px; font-weight:600; margin-bottom:14px; line-height:1.7; }
+.quiz-option { display:block; padding:12px 16px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:8px; cursor:pointer; transition:all 0.2s; font-size:14px; }
+.quiz-option:hover { border-color:var(--accent); }
+.quiz-option.selected { border-color:var(--accent); background:rgba(56,189,248,0.1); }
+.quiz-option.correct { border-color:var(--success); background:rgba(74,222,128,0.15); }
+.quiz-option.wrong { border-color:var(--danger); background:rgba(248,113,113,0.15); }
+.quiz-explanation { padding:14px; background:rgba(56,189,248,0.08); border-radius:var(--radius-sm); margin-top:12px; font-size:13px; line-height:1.7; }
+/* 日历 */
+.calendar { display:grid; grid-template-columns:repeat(7, 1fr); gap:3px; text-align:center; }
+.calendar .day-header { font-size:11px; color:var(--text-muted); padding:6px 0; font-weight:500; }
+.calendar .day { aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:13px; cursor:pointer; transition:all 0.2s; position:relative; }
+.calendar .day:hover { background:rgba(56,189,248,0.1); }
+.calendar .day.today { border:2px solid var(--accent); font-weight:700; }
+.calendar .day.checked { background:rgba(74,222,128,0.3); color:var(--success); font-weight:600; }
+.calendar .day.checked::after { content:''; position:absolute; bottom:2px; width:4px; height:4px; border-radius:50%; background:var(--success); }
+.calendar .day.other-month { color:var(--text-muted); opacity:0.25; }
+.calendar .day.weekend { color:var(--accent3); }
+/* 背诵卡 */
+.recite-card { background:var(--bg); border-radius:var(--radius-sm); padding:20px; margin-bottom:12px; border:1px solid var(--border); }
+.recite-card .question { font-size:16px; font-weight:600; margin-bottom:12px; line-height:1.7; }
+.recite-card .answer { padding:14px; background:rgba(56,189,248,0.06); border-radius:var(--radius-sm); font-size:14px; line-height:1.8; margin-top:12px; display:none; }
+.recite-card .answer.show { display:block; }
+/* 折线图 */
+.chart-container { position:relative; height:220px; margin:16px 0; }
+.chart-container svg { width:100%; height:100%; }
+/* Toast */
+.toast { position:fixed; top:20px; right:20px; padding:12px 20px; background:var(--success); color:#0f172a; border-radius:var(--radius-sm); font-weight:500; font-size:14px; z-index:9999; animation:slideIn 0.3s ease; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+@keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+/* 阶段规划 */
+.phase-timeline { position:relative; padding-left:24px; }
+.phase-timeline::before { content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; background:var(--border); }
+.phase-item { position:relative; padding:12px 0 12px 24px; }
+.phase-item::before { content:''; position:absolute; left:-20px; top:18px; width:12px; height:12px; border-radius:50%; border:2px solid var(--accent); background:var(--bg-card); }
+.phase-item.active::before { background:var(--accent); box-shadow:0 0 8px rgba(56,189,248,0.4); }
+.phase-item.done::before { background:var(--success); border-color:var(--success); }
+.phase-item .phase-header { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.phase-item .phase-name { font-weight:600; font-size:15px; }
+.phase-item .phase-date { font-size:12px; color:var(--text-muted); }
+.phase-item .phase-desc { font-size:13px; color:var(--text-secondary); margin-top:4px; line-height:1.5; }
+.phase-item .phase-tasks { font-size:12px; color:var(--text-muted); margin-top:4px; }
+/* 主题设置面板 */
+.theme-modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; display:none; align-items:center; justify-content:center; }
+.theme-modal.show { display:flex; }
+.theme-panel { background:var(--bg-card); border-radius:var(--radius); padding:24px; max-width:480px; width:90%; max-height:80vh; overflow-y:auto; border:1px solid var(--border); }
+.theme-panel h3 { font-size:18px; margin-bottom:20px; }
+.theme-presets { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+.theme-preset { width:48px; height:48px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:all 0.2s; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.theme-preset:hover { transform:scale(1.1); }
+.theme-preset.active { border-color:var(--text); box-shadow:0 0 12px rgba(255,255,255,0.3); }
+.theme-color-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.theme-color-row label { width:80px; font-size:13px; color:var(--text-secondary); flex-shrink:0; }
+.theme-color-row input[type="color"] { width:36px; height:36px; border:none; border-radius:6px; cursor:pointer; padding:0; background:transparent; }
+.theme-color-row input[type="text"] { flex:1; font-size:12px; }
+/* 软件练习卡片 */
+.software-log { background:var(--bg); border-radius:var(--radius-sm); padding:14px; margin-bottom:12px; }
+.software-log .sw-stat { display:flex; gap:16px; flex-wrap:wrap; }
+.software-log .sw-stat-item { text-align:center; min-width:60px; }
+.software-log .sw-stat-item .sw-val { font-size:24px; font-weight:700; color:var(--accent); }
+.software-log .sw-stat-item .sw-lbl { font-size:11px; color:var(--text-muted); }
+.software-checklist { margin-top:12px; }
+.software-checklist .check-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.software-checklist .check-item:last-child { border-bottom:none; }
+.software-checklist .check-item input[type="checkbox"] { width:18px; height:18px; accent-color:var(--success); cursor:pointer; }
+.software-checklist .check-item.done { opacity:0.5; text-decoration:line-through; }
+/* 响应式 */
+@media (max-width:768px) {
+  nav { width:56px; min-width:56px; }
+  nav .logo { padding:14px 6px; }
+  nav .logo h1 { font-size:0; display:block; width:28px; height:28px; background:linear-gradient(135deg, var(--accent), var(--accent3)); border-radius:50%; margin:0 auto; }
+  nav .logo .sub { display:none; }
+  nav ul li a { padding:14px 6px; justify-content:center; font-size:0; }
+  nav ul li a .nav-icon { margin:0; font-size:20px; }
+  main { margin-left:56px; padding:12px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
+  .countdown { font-size:36px; }
+  .phase-timeline { padding-left:16px; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">
+    <h1>卡西的考研备战仓</h1>
+    <div class="sub">2026 考研 · 地狱模式</div>
+  </div>
+  <ul>
+    <li><a data-page="dashboard" class="active"><span class="nav-icon">📊</span> 仪表盘</a></li>
+    <li><a data-page="english"><span class="nav-icon">📝</span> 英语打卡</a></li>
+    <li><a data-page="politics"><span class="nav-icon">📖</span> 政治刷题</a></li>
+    <li><a data-page="art336"><span class="nav-icon">🎨</span> 336艺术基础</a></li>
+    <li><a data-page="prof998"><span class="nav-icon">🎬</span> 998专业综合</a></li>
+    <li><a data-page="teacher"><span class="nav-icon">🎵</span> 教资面试</a></li>
+    <li><a data-page="review"><span class="nav-icon">📋</span> 每日复盘</a></li>
+    <li><a data-page="data"><span class="nav-icon">📈</span> 学习数据</a></li>
+  </ul>
+  <div style="padding:12px 16px;border-top:1px solid var(--border);">
+    <a onclick="openThemePanel()" style="display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:13px;cursor:pointer;text-decoration:none;padding:6px 0;"><span style="font-size:16px;">🎨</span> 主题设置</a>
+  </div>
+</nav>
+
+<main>
+  <!-- ========== 仪表盘 ========== -->
+  <div class="page active" id="page-dashboard">
+    <div class="card countdown-area">
+      <div style="font-size:14px;color:var(--text-secondary);" id="dash-datetime"></div>
+      <div class="countdown" id="dash-countdown">--</div>
+      <div class="countdown-sub" id="dash-countdown-hours"></div>
+      <div class="mt-md"><button class="btn btn-success" onclick="checkinToday()" id="dash-checkin-btn">✅ 今日打卡</button></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h2>📅 本月打卡日历</h2>
+        <div id="dash-calendar"></div>
+      </div>
+      <div class="card">
+        <h2>📚 四科进度</h2>
+        <div id="dash-progress"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🗓️ 考研阶段规划</h2>
+      <div class="phase-timeline" id="dash-phases"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h2>🔗 快捷链接</h2>
+        <div class="quick-links">
+          <a href="https://yzw.zjcm.edu.cn/" target="_blank" rel="noopener" class="quick-link"><span class="icon">🏫</span> 浙传研究生招生官网</a>
+          <a href="https://yz.chsi.com.cn/" target="_blank" rel="noopener" class="quick-link"><span class="icon">🎓</span> 中国研究生招生信息网</a>
+          <a href="https://yjsc.cuz.edu.cn/dsxx1/dsjj1.htm" target="_blank" rel="noopener" class="quick-link"><span class="icon">👨‍🏫</span> 浙传导师介绍页</a>
+        </div>
+      </div>
+      <div class="card" style="text-align:center;display:flex;align-items:center;justify-content:center;">
+        <div style="font-size:16px;font-style:italic;color:var(--accent3);line-height:1.8;" id="dash-quote"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 英语打卡 ========== -->
+  <div class="page" id="page-english">
+    <div class="card">
+      <div class="flex-between"><h2>📝 每日单词</h2><span class="tag tag-green">🔥 连续打卡 <strong id="eng-streak">0</strong> 天</span></div>
+      <div id="eng-words"></div>
+      <div class="mt-md text-center" id="eng-words-status"></div>
+    </div>
+    <div class="card">
+      <h2>📖 翻译练习</h2>
+      <div id="eng-translation"></div>
+    </div>
+  </div>
+
+  <!-- ========== 政治刷题 ========== -->
+  <div class="page" id="page-politics">
+    <div class="card" id="pol-quiz-card">
+      <div class="flex-between"><h2>📖 每日刷题</h2><a class="btn btn-sm btn-outline" onclick="switchPoliticsTab('wrong')">📋 错题本 <span class="badge" id="pol-wrong-count">0</span></a></div>
+      <div id="pol-quiz"></div>
+      <div id="pol-result"></div>
+    </div>
+    <div class="card" id="pol-wrong-book" style="display:none;">
+      <div class="flex-between"><h2>📋 错题本</h2><a class="btn btn-sm btn-ghost" onclick="switchPoliticsTab('quiz')">← 返回刷题</a></div>
+      <div id="pol-wrong-list"></div>
+    </div>
+    <div class="card">
+      <h2>🔥 政治热点</h2>
+      <div id="pol-hotspot" style="padding:12px;background:var(--bg);border-radius:var(--radius-sm);font-size:14px;line-height:1.6;"></div>
+    </div>
+  </div>
+
+  <!-- ========== 336艺术基础 ========== -->
+  <div class="page" id="page-art336">
+    <div class="card">
+      <h2>📚 参考书阅读进度</h2>
+      <div id="art336-books"></div>
+    </div>
+    <div class="card">
+      <div class="flex-between"><h2>🎯 抽题背诵</h2><span class="tag tag-yellow" id="art336-review-count">待复习: 0</span></div>
+      <div id="art336-recite"></div>
+    </div>
+    <div class="card">
+      <h2>📝 今日学习记录</h2>
+      <textarea id="art336-note" placeholder="记录今天的学习心得..."></textarea>
+      <div class="mt-sm"><button class="btn btn-sm" onclick="saveArt336Note()">💾 保存记录</button></div>
+    </div>
+  </div>
+
+  <!-- ========== 998专业综合 ========== -->
+  <div class="page" id="page-prof998">
+    <div class="card" style="background:rgba(251,191,36,0.08);border-color:var(--warning);">
+      <div style="font-size:15px;font-weight:600;color:var(--warning);">📌 第一轮：看书+软件操作（2个月）</div>
+    </div>
+    <div class="card">
+      <h2>📚 参考书阅读进度</h2>
+      <div id="prof998-books"></div>
+    </div>
+    <div class="card">
+      <h2>🎛️ 软件学习进度</h2>
+      <div id="prof998-software"></div>
+    </div>
+    <div class="card">
+      <h2>📝 今日学习记录</h2>
+      <textarea id="prof998-note" placeholder="记录今天读了哪本书哪几页+软件练习时长..."></textarea>
+      <div class="mt-sm"><button class="btn btn-sm" onclick="saveProf998Note()">💾 保存记录</button></div>
+    </div>
+  </div>
+
+  <!-- ========== 教资面试 ========== -->
+  <div class="page" id="page-teacher">
+    <div class="card">
+      <div class="flex-between"><h2>🎹 每日练琴打卡</h2><span class="tag tag-green" id="teacher-piano-days">练琴 0 天</span></div>
+      <div class="flex-row gap-sm" style="margin-bottom:12px;">
+        <input type="number" id="teacher-piano-mins" placeholder="练琴分钟数" min="0" max="480" style="max-width:120px;">
+        <button class="btn btn-sm" onclick="logPianoTime()">📝 记录练琴</button>
+        <button class="btn btn-xs btn-ghost" onclick="quickPiano(30)">+30分钟</button>
+        <button class="btn btn-xs btn-ghost" onclick="quickPiano(60)">+1小时</button>
+      </div>
+      <div id="teacher-piano-stats" class="software-log"></div>
+    </div>
+
+    <div class="card">
+      <h2>🗣️ 说课练习</h2>
+      <div id="teacher-speech"></div>
+    </div>
+
+    <div class="card">
+      <h2>💬 结构化面试（每日3题）</h2>
+      <div id="teacher-struct"></div>
+    </div>
+  </div>
+
+  <!-- ========== 每日复盘 ========== -->
+  <div class="page" id="page-review">
+    <div class="card"><h2>✅ 今日完成</h2><textarea id="review-done" placeholder="今天完成了哪些任务..."></textarea></div>
+    <div class="card"><h2>⚠️ 今日问题</h2><textarea id="review-problem" placeholder="今天遇到了什么问题..."></textarea></div>
+    <div class="card"><h2>🎯 明日重点</h2><textarea id="review-tomorrow" placeholder="明天的重点任务..."></textarea></div>
+    <div class="card">
+      <h2>⏱️ 今日学习总时长（小时）</h2>
+      <input type="number" id="review-hours" placeholder="如 6.5" step="0.5" min="0" max="24" style="max-width:200px;">
+      <div class="mt-sm"><button class="btn btn-sm" onclick="saveReview()">💾 保存复盘</button></div>
+    </div>
+  </div>
+
+  <!-- ========== 学习数据 ========== -->
+  <div class="page" id="page-data">
+    <div class="grid-3" id="data-stats"></div>
+    <div class="card"><h2>📅 本月打卡日历</h2><div id="data-calendar"></div></div>
+    <div class="card"><h2>📈 本周学习时长</h2><div class="chart-container" id="data-chart"></div></div>
+  </div>
+</main>
+
+<!-- 主题设置弹窗 -->
+<div class="theme-modal" id="theme-modal" onclick="if(event.target===this) closeThemePanel()">
+  <div class="theme-panel">
+    <div class="flex-between mb-md"><h3>🎨 主题设置</h3><button class="btn btn-sm btn-ghost" onclick="closeThemePanel()">✕</button></div>
+
+    <h4 style="font-size:14px;margin-bottom:10px;color:var(--text-secondary);">预设主题</h4>
+    <div class="theme-presets" id="theme-presets"></div>
+
+    <h4 style="font-size:14px;margin-bottom:10px;color:var(--text-secondary);">自定义颜色</h4>
+    <div id="theme-colors"></div>
+
+    <h4 style="font-size:14px;margin-bottom:10px;color:var(--text-secondary);">自定义背景</h4>
+    <div class="flex-row gap-sm">
+      <input type="text" id="theme-bg-url" placeholder="输入背景图片URL（留空则使用纯色背景）" style="flex:1;">
+      <button class="btn btn-sm" onclick="applyBgUrl()">应用</button>
+    </div>
+    <div class="text-sm text-muted mt-sm">支持任何图片直链，推荐使用暗色系壁纸</div>
+
+    <div class="mt-md flex-row gap-sm">
+      <button class="btn btn-sm btn-success" onclick="saveTheme()">💾 保存主题</button>
+      <button class="btn btn-sm btn-ghost" onclick="resetTheme()">🔄 恢复默认</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ==================== 数据管理 ====================
+const STORAGE_KEY = 'kaxi_kaoyan_v2';
+const EXAM_DATE = new Date('2026-12-19T08:30:00');
+
+function getDefaultData() {
+  return {
+    progress: { politics: 0, english: 0, art336: 0, prof998: 0 },
+    eng: {
+      streak: 0, lastStudyDate: '',
+      todayWordIndices: [], wordStatus: {},
+      reviewQueue: [], translationIndex: 0,
+      wordDone: false,
+    },
+    pol: {
+      quizIndices: [], wrongBook: [],
+      lastQuizDate: '', quizAnswered: false,
+    },
+    art336: {
+      bookPages: {0:0,1:0,2:0,3:0},
+      reciteQueue: [], note: '',
+      lastReciteIndex: -1, masteredIndices: [],
+      currentReciteIndex: -1,
+    },
+    prof998: {
+      bookPages: {0:0,1:0,2:0,3:0},
+      softwareLogs: {}, note: '', // softwareLogs: {date: minutes}
+    },
+    review: { done: '', problem: '', tomorrow: '', hours: '' },
+    checkins: {},
+    studyHours: {},
+    // 教资
+    teacher: {
+      pianoLogs: {}, // {date: minutes}
+      speechNote: '',
+      structIndices: [],
+      lastStructDate: '',
+    },
+    // 主题
+    theme: {
+      preset: 'dark',
+      colors: {},
+      bgImage: '',
+    },
+  };
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      const def = getDefaultData();
+      function deepMerge(target, source) {
+        for (const k of Object.keys(source)) {
+          if (!(k in target)) target[k] = source[k];
+          else if (typeof source[k] === 'object' && !Array.isArray(source[k]) && source[k] !== null) {
+            deepMerge(target[k], source[k]);
+          }
+        }
+      }
+      deepMerge(d, def);
+      return d;
+    }
+  } catch(e) { console.error('Load error:', e); }
+  return getDefaultData();
+}
+
+let DATA = loadData();
+function persist() { saveData(DATA); }
+function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+// ==================== 导航 ====================
+document.querySelectorAll('nav a[data-page]').forEach(a => {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelectorAll('nav a[data-page]').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + this.dataset.page).classList.add('active');
+    renderPage(this.dataset.page);
+  });
+});
+
+function renderPage(name) {
+  switch(name) {
+    case 'dashboard': renderDashboard(); break;
+    case 'english': renderEnglish(); break;
+    case 'politics': renderPolitics(); break;
+    case 'art336': renderArt336(); break;
+    case 'prof998': renderProf998(); break;
+    case 'teacher': renderTeacher(); break;
+    case 'review': renderReview(); break;
+    case 'data': renderData(); break;
+  }
+}
+
+// ==================== 打卡 ====================
+function getToday() { return new Date().toISOString().split('T')[0]; }
+
+function checkinToday() {
+  const today = getToday();
+  if (DATA.checkins[today]) { toast('今天已经打过卡啦！🎉'); return; }
+  DATA.checkins[today] = true;
+  persist();
+  toast('打卡成功！今天也要加油！💪');
+  renderDashboard();
+}
+
+// ==================== 日历组件 ====================
+function renderCalendar(containerId, year, month, checkins) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const today = new Date();
+  const todayStr = getToday();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const headers = ['日','一','二','三','四','五','六'];
+
+  let html = '<div class="calendar">';
+  headers.forEach((h,i) => {
+    html += '<div class="day-header' + (i===0||i===6?' weekend':'') + '">' + h + '</div>';
+  });
+  for (let i = 0; i < firstDay; i++) html += '<div class="day other-month"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const isToday = dateStr === todayStr;
+    const isChecked = checkins && checkins[dateStr];
+    const dow = new Date(year, month, d).getDay();
+    let cls = 'day';
+    if (isToday) cls += ' today';
+    if (isChecked) cls += ' checked';
+    if (dow === 0 || dow === 6) cls += ' weekend';
+    html += '<div class="' + cls + '" title="' + dateStr + '">' + d + '</div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ==================== 仪表盘 ====================
+function updateDateTime() {
+  const now = new Date();
+  const el = document.getElementById('dash-datetime');
+  if (!el) return;
+  el.textContent = now.toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'long'}) +
+    ' ' + now.toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+
+  const diff = EXAM_DATE - now;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  document.getElementById('dash-countdown').textContent = days + ' 天';
+  document.getElementById('dash-countdown-hours').textContent =
+    '距离2026考研初试（12月19日）还有 ' + days + ' 天 ' + hours + ' 小时';
+
+  const today = getToday();
+  const btn = document.getElementById('dash-checkin-btn');
+  if (btn) {
+    if (DATA.checkins[today]) {
+      btn.textContent = '✅ 今日已打卡';
+      btn.className = 'btn btn-success';
+    } else {
+      btn.textContent = '✅ 今日打卡';
+      btn.className = 'btn btn-success';
+    }
+  }
+}
+
+const quotes = [
+  '路虽远，行则将至；事虽难，做则必成。',
+  '星光不问赶路人，时光不负有心人。',
+  '你所热爱的，总有一天会反过来拥抱你。',
+  '今天翻的书，就是明天数的钱。',
+  '考研不是因为有希望才坚持，而是坚持了才有希望。',
+  '每一个优秀的人，都有一段沉默的时光。',
+  '乾坤未定，你我皆是黑马。',
+  '既然选择了远方，便只顾风雨兼程。',
+  '你的努力，终将成就无可替代的自己。',
+  '最怕你一生碌碌无为，还安慰自己平凡可贵。',
+  '没有横空出世的幸运，只有不为人知的努力。',
+  '当你觉得晚了的时候，恰恰是最早的时候。',
+  '来得及，考得上，你可以！',
+  '半山腰总是最挤的，你得去山顶看看。',
+  '熬过无人问津的日子，才有诗和远方。',
+  '你只管努力，剩下的交给时间。',
+  '考研是一场和自己的较量。',
+  '莫道桑榆晚，为霞尚满天。',
+  '长风破浪会有时，直挂云帆济沧海。',
+  '宝剑锋从磨砺出，梅花香自苦寒来。',
+];
+
+// 考研阶段规划（2026年地狱模式：7月起步→12月底考试，共6个月）
+const phases = [
+  {
+    name: '第一阶段：极速基础',
+    date: '2026年7月 — 2026年8月（2个月）',
+    desc: '快速过完四科核心内容，建立知识框架',
+    tasks: '英语：高频词汇速背 + 每日长难句 | 政治：精讲精练速读 + 1000题第一轮 | 336：四本参考书速通 | 998：四本参考书速通 + 软件基础操作',
+    startDate: '2026-07-01', endDate: '2026-08-31',
+  },
+  {
+    name: '第二阶段：强化背诵',
+    date: '2026年9月 — 2026年10月（2个月）',
+    desc: '核心知识点背诵 + 真题训练 + 错题整理',
+    tasks: '英语：阅读真题 + 作文模板背诵 | 政治：1000题二刷 + 错题本复习 | 336：名词解释/简答题集中背诵 | 998：专题练习 + 软件操作熟练',
+    startDate: '2026-09-01', endDate: '2026-10-31',
+  },
+  {
+    name: '第三阶段：冲刺模拟',
+    date: '2026年11月 — 2026年12月18日（~1.5个月）',
+    desc: '全真模拟 + 押题背诵 + 查漏补缺',
+    tasks: '英语：全真模拟 + 作文押题 | 政治：肖四肖八 + 时政冲刺 | 336：核心考点反复背诵 + 论述训练 | 998：模拟实战 + 最终查漏',
+    startDate: '2026-11-01', endDate: '2026-12-18',
+  },
+];
+
+function getPhaseStatus(phase) {
+  const now = new Date();
+  const start = new Date(phase.startDate);
+  const end = new Date(phase.endDate);
+  if (now < start) return 'upcoming';
+  if (now > end) return 'done';
+  return 'active';
+}
+
+function renderDashboard() {
+  updateDateTime();
+  document.getElementById('dash-quote').textContent = '💬 ' + quotes[Math.floor(Math.random() * quotes.length)];
+
+  // 打卡日历
+  const now = new Date();
+  renderCalendar('dash-calendar', now.getFullYear(), now.getMonth(), DATA.checkins);
+
+  // 四科进度（自动计算）
+  const autoProgress = calcAutoProgress();
+  const subjects = [
+    { key: 'politics', name: '政治', icon: '📖', color: 'var(--danger)', pct: autoProgress.politics, detail: autoProgress.politicsDetail },
+    { key: 'english', name: '英语二', icon: '🇬🇧', color: 'var(--accent)', pct: autoProgress.english, detail: autoProgress.englishDetail },
+    { key: 'art336', name: '336艺术基础', icon: '🎨', color: 'var(--accent2)', pct: autoProgress.art336, detail: autoProgress.art336Detail },
+    { key: 'prof998', name: '998专业综合', icon: '🎬', color: 'var(--success)', pct: autoProgress.prof998, detail: autoProgress.prof998Detail },
+  ];
+  document.getElementById('dash-progress').innerHTML = subjects.map(s => {
+    return '<div style="margin-bottom:16px;">' +
+      '<div class="flex-between mb-sm"><span>' + s.icon + ' ' + s.name + '</span><span style="font-weight:600;">' + s.pct + '%</span></div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:' + s.pct + '%;background:' + s.color + ';"></div></div>' +
+      '<div class="text-sm text-muted mt-sm">' + s.detail + '</div>' +
+      '</div>';
+  }).join('');
+
+  // 阶段规划
+  document.getElementById('dash-phases').innerHTML = phases.map(p => {
+    const status = getPhaseStatus(p);
+    let statusTag = '';
+    if (status === 'active') statusTag = '<span class="tag tag-green">当前阶段</span>';
+    else if (status === 'done') statusTag = '<span class="tag tag-blue">已完成</span>';
+    else statusTag = '<span class="tag tag-purple">待开始</span>';
+    return '<div class="phase-item ' + status + '">' +
+      '<div class="phase-header"><span class="phase-name">' + p.name + '</span>' + statusTag + '</div>' +
+      '<div class="phase-date">📅 ' + p.date + '</div>' +
+      '<div class="phase-desc">' + p.desc + '</div>' +
+      '<div class="phase-tasks">📋 ' + p.tasks + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+// 自动计算各科进度
+function calcAutoProgress() {
+  // 政治 = 错题掌握率（已掌握/总错题）
+  const polTotal = DATA.pol.wrongBook.length;
+  const polMastered = DATA.pol.wrongBook.filter(w => w.mastered).length;
+  const polPct = polTotal === 0 ? 0 : Math.round(polMastered / polTotal * 100);
+  const polDetail = '错题掌握 ' + polMastered + '/' + polTotal;
+
+  // 英语 = 今日单词完成率 × 0.5 + 打卡连续天数 × 0.5（上限100%）
+  const engIndices = DATA.eng.todayWordIndices || [];
+  const engDone = engIndices.filter(i => DATA.eng.wordStatus && DATA.eng.wordStatus[i] !== undefined).length;
+  const engWordPct = engIndices.length > 0 ? Math.round(engDone / engIndices.length * 50) : 0;
+  const engStreakPct = Math.min(50, (DATA.eng.streak || 0) * 5);
+  const engPct = Math.min(100, engWordPct + engStreakPct);
+  const engDetail = '今日单词 ' + engDone + '/' + engIndices.length + ' · 连续' + (DATA.eng.streak||0) + '天';
+
+  // 336 = 书籍平均阅读进度 × 0.6 + 背诵掌握率 × 0.4
+  const artBookPct = art336Books.reduce((sum, b, i) => sum + ((DATA.art336.bookPages[i]||0) / b.pages), 0) / 4 * 60;
+  const artRecitePct = art336ReciteBank.length > 0 ? Math.round(DATA.art336.masteredIndices.length / art336ReciteBank.length * 40) : 0;
+  const artPct = Math.min(100, Math.round(artBookPct + artRecitePct));
+  const artDetail = '已背 ' + DATA.art336.masteredIndices.length + '/' + art336ReciteBank.length + ' 题';
+
+  // 998 = 书籍平均阅读进度 × 0.6 + 软件技能清单完成率 × 0.4
+  const profBookPct = prof998Books.reduce((sum, b, i) => sum + ((DATA.prof998.bookPages[i]||0) / b.pages), 0) / 4 * 60;
+  const checklist = ['install','interface','midi','audio','mixer','automation','export','project'];
+  const completed = DATA.prof998.softwareChecklist || {};
+  const doneCount = checklist.filter(c => completed[c]).length;
+  const softPct = Math.round(doneCount / checklist.length * 40);
+  const profPct = Math.min(100, Math.round(profBookPct + softPct));
+  const profDetail = '软件技能 ' + doneCount + '/' + checklist.length;
+
+  return {
+    politics: polPct, politicsDetail: polDetail,
+    english: engPct, englishDetail: engDetail,
+    art336: artPct, art336Detail: artDetail,
+    prof998: profPct, prof998Detail: profDetail,
+  };
+}
+
+// ==================== 英语打卡 ====================
+const wordBank = [
+  { word: 'abandon', phonetic: '/əˈbændən/', meaning: 'v. 放弃；抛弃' },
+  { word: 'abstract', phonetic: '/ˈæbstrækt/', meaning: 'adj. 抽象的 n. 摘要' },
+  { word: 'academic', phonetic: '/ˌækəˈdemɪk/', meaning: 'adj. 学术的；学院的' },
+  { word: 'access', phonetic: '/ˈækses/', meaning: 'n. 进入；通道 v. 访问' },
+  { word: 'accommodate', phonetic: '/əˈkɒmədeɪt/', meaning: 'v. 容纳；适应；提供住宿' },
+  { word: 'accompany', phonetic: '/əˈkʌmpəni/', meaning: 'v. 陪伴；伴随' },
+  { word: 'accomplish', phonetic: '/əˈkʌmplɪʃ/', meaning: 'v. 完成；实现' },
+  { word: 'accurate', phonetic: '/ˈækjərət/', meaning: 'adj. 准确的；精确的' },
+  { word: 'achieve', phonetic: '/əˈtʃiːv/', meaning: 'v. 达到；取得' },
+  { word: 'acknowledge', phonetic: '/əkˈnɒlɪdʒ/', meaning: 'v. 承认；感谢' },
+  { word: 'acquire', phonetic: '/əˈkwaɪər/', meaning: 'v. 获得；习得' },
+  { word: 'adapt', phonetic: '/əˈdæpt/', meaning: 'v. 适应；改编' },
+  { word: 'adequate', phonetic: '/ˈædɪkwət/', meaning: 'adj. 足够的；适当的' },
+  { word: 'adjust', phonetic: '/əˈdʒʌst/', meaning: 'v. 调整；适应' },
+  { word: 'administration', phonetic: '/ədˌmɪnɪˈstreɪʃn/', meaning: 'n. 管理；行政' },
+  { word: 'admire', phonetic: '/ədˈmaɪər/', meaning: 'v. 钦佩；赞赏' },
+  { word: 'adopt', phonetic: '/əˈdɒpt/', meaning: 'v. 采用；收养' },
+  { word: 'advance', phonetic: '/ədˈvɑːns/', meaning: 'v./n. 前进；进步' },
+  { word: 'advertise', phonetic: '/ˈædvətaɪz/', meaning: 'v. 做广告；宣传' },
+  { word: 'affair', phonetic: '/əˈfeər/', meaning: 'n. 事务；事件' },
+  { word: 'affect', phonetic: '/əˈfekt/', meaning: 'v. 影响；感动' },
+  { word: 'afford', phonetic: '/əˈfɔːd/', meaning: 'v. 负担得起；提供' },
+  { word: 'aggressive', phonetic: '/əˈɡresɪv/', meaning: 'adj. 侵略的；好斗的；有进取心的' },
+  { word: 'allocate', phonetic: '/ˈæləkeɪt/', meaning: 'v. 分配；拨出' },
+  { word: 'alternative', phonetic: '/ɔːlˈtɜːnətɪv/', meaning: 'n. 替代品 adj. 替代的' },
+  { word: 'ambiguous', phonetic: '/æmˈbɪɡjuəs/', meaning: 'adj. 模棱两可的；含糊的' },
+  { word: 'analyze', phonetic: '/ˈænəlaɪz/', meaning: 'v. 分析' },
+  { word: 'annual', phonetic: '/ˈænjuəl/', meaning: 'adj. 年度的 n. 年刊' },
+  { word: 'anticipate', phonetic: '/ænˈtɪsɪpeɪt/', meaning: 'v. 预期；期望' },
+  { word: 'apparent', phonetic: '/əˈpærənt/', meaning: 'adj. 明显的；表面上的' },
+  { word: 'appeal', phonetic: '/əˈpiːl/', meaning: 'v./n. 呼吁；吸引；上诉' },
+  { word: 'apply', phonetic: '/əˈplaɪ/', meaning: 'v. 申请；应用' },
+  { word: 'appreciate', phonetic: '/əˈpriːʃieɪt/', meaning: 'v. 欣赏；感激；理解' },
+  { word: 'approach', phonetic: '/əˈprəʊtʃ/', meaning: 'v. 接近 n. 方法' },
+  { word: 'appropriate', phonetic: '/əˈprəʊpriət/', meaning: 'adj. 适当的 v. 拨款' },
+  { word: 'approve', phonetic: '/əˈpruːv/', meaning: 'v. 批准；赞成' },
+  { word: 'arise', phonetic: '/əˈraɪz/', meaning: 'v. 出现；产生' },
+  { word: 'aspect', phonetic: '/ˈæspekt/', meaning: 'n. 方面；层面' },
+  { word: 'assemble', phonetic: '/əˈsembl/', meaning: 'v. 集合；组装' },
+  { word: 'assess', phonetic: '/əˈses/', meaning: 'v. 评估；评定' },
+  { word: 'assign', phonetic: '/əˈsaɪn/', meaning: 'v. 分配；指派' },
+  { word: 'assist', phonetic: '/əˈsɪst/', meaning: 'v. 帮助；协助' },
+  { word: 'assume', phonetic: '/əˈsjuːm/', meaning: 'v. 假设；承担' },
+  { word: 'attain', phonetic: '/əˈteɪn/', meaning: 'v. 达到；获得' },
+  { word: 'attribute', phonetic: '/əˈtrɪbjuːt/', meaning: 'v. 归因于 n. 属性' },
+  { word: 'authority', phonetic: '/ɔːˈθɒrəti/', meaning: 'n. 权威；当局' },
+  { word: 'available', phonetic: '/əˈveɪləbl/', meaning: 'adj. 可用的；有效的' },
+  { word: 'benefit', phonetic: '/ˈbenɪfɪt/', meaning: 'n. 利益 v. 受益' },
+  { word: 'budget', phonetic: '/ˈbʌdʒɪt/', meaning: 'n. 预算 v. 做预算' },
+  { word: 'capable', phonetic: '/ˈkeɪpəbl/', meaning: 'adj. 有能力的' },
+  { word: 'capacity', phonetic: '/kəˈpæsəti/', meaning: 'n. 能力；容量' },
+  { word: 'category', phonetic: '/ˈkætəɡəri/', meaning: 'n. 类别；种类' },
+  { word: 'cease', phonetic: '/siːs/', meaning: 'v. 停止；终止' },
+  { word: 'challenge', phonetic: '/ˈtʃælɪndʒ/', meaning: 'n./v. 挑战' },
+  { word: 'characteristic', phonetic: '/ˌkærəktəˈrɪstɪk/', meaning: 'n. 特征 adj. 典型的' },
+  { word: 'circumstance', phonetic: '/ˈsɜːkəmstəns/', meaning: 'n. 环境；情况' },
+  { word: 'claim', phonetic: '/kleɪm/', meaning: 'v./n. 声称；要求；索赔' },
+  { word: 'collapse', phonetic: '/kəˈlæps/', meaning: 'v./n. 倒塌；崩溃' },
+  { word: 'comment', phonetic: '/ˈkɒment/', meaning: 'n./v. 评论' },
+  { word: 'commission', phonetic: '/kəˈmɪʃn/', meaning: 'n. 委员会；佣金 v. 委托' },
+  { word: 'commit', phonetic: '/kəˈmɪt/', meaning: 'v. 犯（罪）；承诺；投入' },
+  { word: 'communicate', phonetic: '/kəˈmjuːnɪkeɪt/', meaning: 'v. 交流；传达' },
+  { word: 'community', phonetic: '/kəˈmjuːnəti/', meaning: 'n. 社区；团体' },
+  { word: 'compensate', phonetic: '/ˈkɒmpenseɪt/', meaning: 'v. 补偿；赔偿' },
+  { word: 'compete', phonetic: '/kəmˈpiːt/', meaning: 'v. 竞争；比赛' },
+  { word: 'complex', phonetic: '/ˈkɒmpleks/', meaning: 'adj. 复杂的 n. 综合体' },
+  { word: 'component', phonetic: '/kəmˈpəʊnənt/', meaning: 'n. 组成部分；部件' },
+  { word: 'concentrate', phonetic: '/ˈkɒnsntreɪt/', meaning: 'v. 集中；专注' },
+  { word: 'concept', phonetic: '/ˈkɒnsept/', meaning: 'n. 概念；观念' },
+  { word: 'conclude', phonetic: '/kənˈkluːd/', meaning: 'v. 得出结论；结束' },
+  { word: 'conduct', phonetic: '/kənˈdʌkt/', meaning: 'v. 进行；指挥 n. 行为' },
+  { word: 'conference', phonetic: '/ˈkɒnfərəns/', meaning: 'n. 会议；讨论会' },
+  { word: 'confident', phonetic: '/ˈkɒnfɪdənt/', meaning: 'adj. 自信的；有信心的' },
+  { word: 'confirm', phonetic: '/kənˈfɜːm/', meaning: 'v. 确认；证实' },
+  { word: 'conflict', phonetic: '/ˈkɒnflɪkt/', meaning: 'n. 冲突；矛盾 v. 冲突' },
+  { word: 'conscious', phonetic: '/ˈkɒnʃəs/', meaning: 'adj. 有意识的；清醒的' },
+  { word: 'consequence', phonetic: '/ˈkɒnsɪkwəns/', meaning: 'n. 结果；后果' },
+  { word: 'considerable', phonetic: '/kənˈsɪdərəbl/', meaning: 'adj. 相当大的；重要的' },
+  { word: 'consist', phonetic: '/kənˈsɪst/', meaning: 'v. 由…组成；在于' },
+  { word: 'constant', phonetic: '/ˈkɒnstənt/', meaning: 'adj. 不断的；恒定的' },
+  { word: 'constitute', phonetic: '/ˈkɒnstɪtjuːt/', meaning: 'v. 构成；组成' },
+  { word: 'construct', phonetic: '/kənˈstrʌkt/', meaning: 'v. 建造；构建' },
+  { word: 'consume', phonetic: '/kənˈsjuːm/', meaning: 'v. 消费；消耗' },
+  { word: 'contact', phonetic: '/ˈkɒntækt/', meaning: 'n./v. 联系；接触' },
+  { word: 'contemporary', phonetic: '/kənˈtemprəri/', meaning: 'adj. 当代的；同时代的' },
+  { word: 'context', phonetic: '/ˈkɒntekst/', meaning: 'n. 背景；语境；上下文' },
+  { word: 'contract', phonetic: '/ˈkɒntrækt/', meaning: 'n. 合同 v. 收缩；感染' },
+  { word: 'contrast', phonetic: '/ˈkɒntrɑːst/', meaning: 'n./v. 对比；对照' },
+  { word: 'contribute', phonetic: '/kənˈtrɪbjuːt/', meaning: 'v. 贡献；捐献；导致' },
+  { word: 'controversy', phonetic: '/ˈkɒntrəvɜːsi/', meaning: 'n. 争论；争议' },
+  { word: 'convention', phonetic: '/kənˈvenʃn/', meaning: 'n. 大会；惯例；公约' },
+  { word: 'convince', phonetic: '/kənˈvɪns/', meaning: 'v. 说服；使信服' },
+  { word: 'cooperate', phonetic: '/kəʊˈɒpəreɪt/', meaning: 'v. 合作；协作' },
+  { word: 'coordinate', phonetic: '/kəʊˈɔːdɪneɪt/', meaning: 'v. 协调 n. 坐标' },
+  { word: 'corporation', phonetic: '/ˌkɔːpəˈreɪʃn/', meaning: 'n. 公司；企业' },
+  { word: 'correspond', phonetic: '/ˌkɒrəˈspɒnd/', meaning: 'v. 相符；通信；相当于' },
+  { word: 'crucial', phonetic: '/ˈkruːʃl/', meaning: 'adj. 关键的；至关重要的' },
+  { word: 'cultivate', phonetic: '/ˈkʌltɪveɪt/', meaning: 'v. 培养；耕作' },
+];
+
+const translationBank = [
+  { en: 'The researchers suggest that capuchin monkeys, like humans, are guided by social emotions.', zh: '研究人员认为，卷尾猴和人类一样，受到社会情感的引导。' },
+  { en: 'But brain researchers have discovered that when we consciously develop new habits, we create parallel synaptic paths, and even entirely new brain cells, that can jump our trains of thought onto new, innovative tracks.', zh: '但大脑研究人员发现，当我们有意识地培养新习惯时，我们会创建平行的突触路径，甚至全新的脑细胞，这能让我们的思维跳跃到新的、创新的轨道上。' },
+  { en: 'The idea that some groups of people may be more intelligent than others is one of those hypotheses that dare not speak its name.', zh: '某些群体可能比其他群体更聪明这一观点，是那些不敢明说的假说之一。' },
+  { en: 'In his book The Tipping Point, Malcolm Gladwell argues that social epidemics are driven in large part by the actions of a tiny minority of special individuals.', zh: '马尔科姆·格拉德威尔在其《引爆点》一书中指出，社会流行潮在很大程度上是由极少数特殊个体的行为推动的。' },
+  { en: 'The way consumers now approach the process of making purchase decisions means that marketing\'s impact stems from a broad range of factors beyond conventional paid media.', zh: '消费者现在做出购买决策的方式意味着，营销的影响力来源于传统付费媒体之外的广泛因素。' },
+  { en: 'An animal species becomes extinct when it fails to produce enough young in each generation to keep pace with the death-rate.', zh: '当一个动物物种每一代繁殖的后代数量无法跟上死亡率时，它就会灭绝。' },
+  { en: 'The subtle and intelligent little book The Marketplace of Ideas: Reform and Resistance in the American University should be read by every student thinking of applying to take a doctoral degree.', zh: '每个考虑申请攻读博士学位的学生都应该读一读《思想市场：美国大学的改革与阻力》这本精妙而睿智的小书。' },
+  { en: 'To read such books today is to marvel at the fact that their learned contents were once deemed suitable for publication in general-circulation dailies.', zh: '今天阅读这些书，你会惊叹于这样一个事实：它们那些学术性的内容曾被认为适合在大众发行的日报上发表。' },
+  { en: 'We are even farther removed from the unfocused newspaper reviews published in England between the turn of the 20th century and the eve of World War II.', zh: '我们与20世纪初至二战前夕在英国发表的那些主题宽泛的报纸评论更是相去甚远。' },
+  { en: 'The infrastructure required to make a physical newspaper — printing presses, delivery trucks — is not merely expensive; it is excessive at a time when online-only competitors are proving they can produce high-quality content without them.', zh: '制作实体报纸所需的基础设施——印刷机、送货车——不仅昂贵，而且在纯线上竞争对手证明他们可以在没有这些设施的情况下生产高质量内容的时代，这些设施是多余的。' },
+  { en: 'The significance of hot spots is not confined to their role as a frame of reference.', zh: '热点的重要性不仅限于其作为参照系的作用。' },
+  { en: 'As funding for science has declined, scientists have attacked "anti-science" in several books.', zh: '随着科研经费的减少，科学家们在多本书中对"反科学"进行了抨击。' },
+  { en: 'Few would dispute that the term applies to the Unabomber, whose manifesto scorns science and longs for return to a pre-technological utopia.', zh: '几乎没有人会否认这个词适用于"大学炸弹客"，他的宣言蔑视科学，并渴望回到前技术时代的乌托邦。' },
+  { en: 'Some scholars conclude that a government with sufficient power to achieve its goals would also have sufficient power to confiscate the property of its citizens.', zh: '一些学者得出结论：一个有足够权力实现其目标的政府，也会有足够的权力没收其公民的财产。' },
+  { en: 'Progress in both areas is undoubtedly necessary for the social, political and intellectual development of these and all other societies.', zh: '这两个领域的进步对于这些社会以及所有其他社会的社会、政治和智力发展无疑是必要的。' },
+];
+
+function getDailyWordIndices() {
+  const today = getToday();
+  if (DATA.eng.lastStudyDate === today && DATA.eng.todayWordIndices.length > 0) {
+    return DATA.eng.todayWordIndices;
+  }
+  // Generate new set: 10 random + up to 5 from review queue
+  const pool = [...Array(wordBank.length).keys()];
+  const indices = [];
+  while (indices.length < 10) {
+    const r = Math.floor(Math.random() * pool.length);
+    if (!indices.includes(pool[r])) indices.push(pool[r]);
+  }
+  // Add review queue words
+  const review = DATA.eng.reviewQueue.slice(0, 5);
+  for (const ri of review) {
+    if (!indices.includes(ri)) indices.push(ri);
+  }
+  DATA.eng.todayWordIndices = indices;
+  DATA.eng.lastStudyDate = today;
+  DATA.eng.wordDone = false;
+  DATA.eng.wordStatus = {};
+  persist();
+  return indices;
+}
+
+function renderEnglish() {
+  const indices = getDailyWordIndices();
+  const status = DATA.eng.wordStatus || {};
+  const allDone = indices.length > 0 && indices.every(i => status[i] !== undefined);
+
+  document.getElementById('eng-streak').textContent = DATA.eng.streak || 0;
+
+  let html = '';
+  indices.forEach((idx, i) => {
+    const w = wordBank[idx];
+    const s = status[idx];
+    let cls = 'word-card';
+    let statusBadge = '';
+    if (s === 'known') { cls += ' word-known'; statusBadge = '<span class="tag tag-green">认识</span>'; }
+    else if (s === 'unknown') { cls += ' word-unknown'; statusBadge = '<span class="tag tag-red">不认识</span>'; }
+    html += '<div class="' + cls + '">' +
+      '<div><span class="word">' + w.word + '</span><span class="phonetic">' + w.phonetic + '</span></div>' +
+      '<div class="meaning">' + w.meaning + '</div>' +
+      '<div class="actions">' + statusBadge +
+      (s === undefined ? '<button class="btn btn-xs btn-success" onclick="markWord(' + idx + ',\'known\')">✅ 认识</button>' +
+      '<button class="btn btn-xs btn-danger" onclick="markWord(' + idx + ',\'unknown\')">❌ 不认识</button>' : '') +
+      '</div></div>';
+  });
+  document.getElementById('eng-words').innerHTML = html;
+
+  if (allDone) {
+    document.getElementById('eng-words-status').innerHTML = '<span class="tag tag-green">🎉 今日单词已完成！</span>';
+    updateEngStreak();
+  } else {
+    document.getElementById('eng-words-status').innerHTML = '<span class="text-sm text-muted">剩余 ' + indices.filter(i => status[i] === undefined).length + ' 个单词待标记</span>';
+  }
+
+  // Translation
+  if (DATA.eng.lastStudyDate !== getToday()) {
+    DATA.eng.translationIndex = Math.floor(Math.random() * translationBank.length);
+  }
+  const t = translationBank[DATA.eng.translationIndex];
+  document.getElementById('eng-translation').innerHTML =
+    '<div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;font-size:15px;line-height:1.7;border-left:3px solid var(--accent);">' + t.en + '</div>' +
+    '<textarea id="eng-trans-input" placeholder="请输入你的翻译..."></textarea>' +
+    '<div class="mt-sm flex-row gap-sm">' +
+    '<button class="btn btn-sm" onclick="showTranslation()">📖 查看参考译文</button>' +
+    '<button class="btn btn-sm btn-ghost" onclick="nextTranslation()">🔄 换一题</button>' +
+    '</div>' +
+    '<div id="eng-trans-answer" style="display:none;margin-top:12px;padding:14px;background:rgba(74,222,128,0.08);border-radius:var(--radius-sm);border-left:3px solid var(--success);font-size:14px;line-height:1.7;"></div>';
+}
+
+function markWord(idx, status) {
+  DATA.eng.wordStatus[idx] = status;
+  if (status === 'unknown') {
+    if (!DATA.eng.reviewQueue.includes(idx)) DATA.eng.reviewQueue.push(idx);
+  } else {
+    DATA.eng.reviewQueue = DATA.eng.reviewQueue.filter(i => i !== idx);
+  }
+  // Check if all done
+  const indices = DATA.eng.todayWordIndices;
+  const allDone = indices.every(i => DATA.eng.wordStatus[i] !== undefined);
+  if (allDone) {
+    DATA.eng.wordDone = true;
+    updateEngStreak();
+  }
+  persist();
+  renderEnglish();
+}
+
+function updateEngStreak() {
+  const today = getToday();
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  if (DATA.eng.lastStudyDate === today) {
+    // Already counted today
+  } else if (DATA.eng.lastStudyDate === yesterday) {
+    DATA.eng.streak = (DATA.eng.streak || 0) + 1;
+  } else {
+    DATA.eng.streak = 1;
+  }
+  DATA.eng.lastStudyDate = today;
+  // Also auto-checkin
+  if (!DATA.checkins[today]) DATA.checkins[today] = true;
+  persist();
+}
+
+function showTranslation() {
+  const t = translationBank[DATA.eng.translationIndex];
+  const ans = document.getElementById('eng-trans-answer');
+  ans.style.display = 'block';
+  ans.innerHTML = '<strong>参考译文：</strong><br>' + t.zh;
+}
+
+function nextTranslation() {
+  DATA.eng.translationIndex = Math.floor(Math.random() * translationBank.length);
+  persist();
+  renderEnglish();
+}
+
+// ==================== 政治刷题 ====================
+const politicsQuiz = [
+  { q: '马克思主义哲学认为，世界的统一性在于它的（  ）', opts: ['A. 客观性', 'B. 物质性', 'C. 可知性', 'D. 矛盾性'], ans: 1, exp: '世界的统一性在于它的物质性。这是马克思主义哲学的基本观点，认为世界是物质的，物质是世界的本原。' },
+  { q: '意识的本质是（  ）', opts: ['A. 人脑分泌的特殊物质', 'B. 客观世界的主观映象', 'C. 物质的特殊形态', 'D. 独立于物质的精神实体'], ans: 1, exp: '意识是客观世界在人脑中的主观映象。意识的内容是客观的，形式是主观的。' },
+  { q: '唯物辩证法的实质和核心是（  ）', opts: ['A. 质量互变规律', 'B. 否定之否定规律', 'C. 对立统一规律', 'D. 普遍联系的观点'], ans: 2, exp: '对立统一规律是唯物辩证法的实质和核心，它揭示了事物发展的源泉和动力。' },
+  { q: '实践是检验真理的唯一标准，这是因为（  ）', opts: ['A. 实践具有直接现实性', 'B. 实践是主观见之于客观的活动', 'C. 实践能把主观和客观联系起来', 'D. 以上都是'], ans: 3, exp: '实践具有直接现实性的品格，是主观见之于客观的活动，能够把主观认识与客观实际联系起来加以对照，从而检验认识的真理性。' },
+  { q: '社会存在决定社会意识，社会意识是社会存在的反映。这一观点属于（  ）', opts: ['A. 历史唯心主义', 'B. 历史唯物主义', 'C. 机械唯物主义', 'D. 辩证唯心主义'], ans: 1, exp: '这是历史唯物主义的基本观点。社会存在决定社会意识，社会意识反作用于社会存在。' },
+  { q: '商品二因素是指（  ）', opts: ['A. 使用价值和交换价值', 'B. 使用价值和价值', 'C. 价值和交换价值', 'D. 价值和价格'], ans: 1, exp: '商品的二因素是使用价值和价值。使用价值是商品的自然属性，价值是商品的社会属性。' },
+  { q: '剩余价值产生的唯一源泉是（  ）', opts: ['A. 资本家的管理劳动', 'B. 先进技术设备', 'C. 雇佣工人的剩余劳动', 'D. 市场价格的波动'], ans: 2, exp: '剩余价值是由雇佣工人的剩余劳动创造的，被资本家无偿占有的那部分价值。' },
+  { q: '新民主主义革命的总路线中，"人民大众"指的是（  ）', opts: ['A. 工人阶级', 'B. 工人阶级和农民阶级', 'C. 工人阶级、农民阶级、城市小资产阶级和民族资产阶级', 'D. 所有中国人'], ans: 2, exp: '新民主主义革命中的人民大众包括工人阶级、农民阶级、城市小资产阶级和民族资产阶级。' },
+  { q: '社会主义初级阶段的基本经济制度是（  ）', opts: ['A. 公有制为主体', 'B. 公有制为主体、多种所有制经济共同发展', 'C. 按劳分配为主体', 'D. 社会主义市场经济体制'], ans: 1, exp: '公有制为主体、多种所有制经济共同发展，是我国社会主义初级阶段的基本经济制度。' },
+  { q: '"四个全面"战略布局中，战略目标是（  ）', opts: ['A. 全面深化改革', 'B. 全面依法治国', 'C. 全面从严治党', 'D. 全面建设社会主义现代化国家'], ans: 3, exp: '全面建设社会主义现代化国家是战略目标，全面深化改革、全面依法治国、全面从严治党是战略举措。' },
+  { q: '毛泽东思想的活的灵魂包括（  ）', opts: ['A. 实事求是', 'B. 群众路线', 'C. 独立自主', 'D. 以上都是'], ans: 3, exp: '实事求是、群众路线、独立自主是毛泽东思想的活的灵魂，是贯穿于毛泽东思想各个组成部分的立场、观点和方法。' },
+  { q: '社会主义改造完成后，我国社会的主要矛盾是（  ）', opts: ['A. 无产阶级和资产阶级的矛盾', 'B. 人民日益增长的物质文化需要同落后的社会生产之间的矛盾', 'C. 生产力和生产关系的矛盾', 'D. 经济基础和上层建筑的矛盾'], ans: 1, exp: '1956年社会主义改造基本完成后，党的八大指出我国社会的主要矛盾是人民日益增长的物质文化需要同落后的社会生产之间的矛盾。' },
+  { q: '全面深化改革的出发点和落脚点是（  ）', opts: ['A. 促进社会公平正义、增进人民福祉', 'B. 完善社会主义市场经济体制', 'C. 实现中华民族伟大复兴', 'D. 解放和发展社会生产力'], ans: 0, exp: '全面深化改革必须以促进社会公平正义、增进人民福祉为出发点和落脚点。' },
+  { q: '社会主义核心价值观在个人层面的要求是（  ）', opts: ['A. 富强、民主、文明、和谐', 'B. 自由、平等、公正、法治', 'C. 爱国、敬业、诚信、友善', 'D. 创新、协调、绿色、开放、共享'], ans: 2, exp: '爱国、敬业、诚信、友善是社会主义核心价值观在个人层面的价值准则。' },
+  { q: '中国共产党的根本宗旨是（  ）', opts: ['A. 实现共产主义', 'B. 全心全意为人民服务', 'C. 解放和发展生产力', 'D. 坚持改革开放'], ans: 1, exp: '全心全意为人民服务是中国共产党的根本宗旨，是党的一切工作的出发点和落脚点。' },
+  { q: '事物发展过程中的"度"是指（  ）', opts: ['A. 事物的规模', 'B. 事物的数量', 'C. 事物保持其质的量的界限', 'D. 事物的变化程度'], ans: 2, exp: '"度"是事物保持其质的量的界限、幅度和范围。超出度的范围，事物就会发生质变。' },
+  { q: '感性认识和理性认识统一的基础是（  ）', opts: ['A. 感觉', 'B. 知觉', 'C. 实践', 'D. 理论'], ans: 2, exp: '感性认识和理性认识是认识过程的两个阶段，它们统一的基础是实践。' },
+  { q: '资本有机构成提高的前提是（  ）', opts: ['A. 社会劳动生产率提高', 'B. 个别资本增大', 'C. 剩余价值率提高', 'D. 工人工资提高'], ans: 1, exp: '资本有机构成提高以个别资本增大为前提。个别资本增大有两种形式：资本积聚和资本集中。' },
+  { q: '中国人民抗日战争胜利的决定性因素是（  ）', opts: ['A. 中国共产党的中流砥柱作用', 'B. 以爱国主义为核心的民族精神', 'C. 全民族抗战', 'D. 世界反法西斯力量的援助'], ans: 2, exp: '全民族抗战是中国人民抗日战争胜利的决定性因素。抗日战争是中华民族全民族的抗战。' },
+  { q: '新发展理念中，解决发展动力问题的是（  ）', opts: ['A. 创新', 'B. 协调', 'C. 绿色', 'D. 共享'], ans: 0, exp: '创新发展注重解决发展动力问题。创新是引领发展的第一动力。' },
+];
+
+function getDailyQuizIndices() {
+  const today = getToday();
+  if (DATA.pol.lastQuizDate === today && DATA.pol.quizIndices.length > 0) {
+    return DATA.pol.quizIndices;
+  }
+  const pool = [...Array(politicsQuiz.length).keys()];
+  const indices = [];
+  while (indices.length < 5) {
+    const r = Math.floor(Math.random() * pool.length);
+    if (!indices.includes(pool[r])) indices.push(pool[r]);
+  }
+  DATA.pol.quizIndices = indices;
+  DATA.pol.lastQuizDate = today;
+  DATA.pol.quizAnswered = false;
+  persist();
+  return indices;
+}
+
+let polUserAnswers = {};
+
+function renderPolitics() {
+  document.getElementById('pol-wrong-count').textContent = DATA.pol.wrongBook.length;
+  renderPoliticsHotspot();
+  renderPoliticsQuiz();
+}
+
+function renderPoliticsQuiz() {
+  const indices = getDailyQuizIndices();
+  polUserAnswers = {};
+  let html = '';
+  indices.forEach((qi, i) => {
+    const q = politicsQuiz[qi];
+    html += '<div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">' +
+      '<div class="quiz-question">第' + (i+1) + '题：' + q.q + '</div>';
+    q.opts.forEach((opt, oi) => {
+      html += '<div class="quiz-option" data-q="' + i + '" data-o="' + oi + '" onclick="selectPolOption(this, ' + i + ', ' + oi + ', ' + qi + ')">' + opt + '</div>';
+    });
+    html += '<div class="quiz-explanation" id="pol-exp-' + i + '" style="display:none;"></div>';
+    html += '</div>';
+  });
+  document.getElementById('pol-quiz').innerHTML = html;
+  document.getElementById('pol-result').innerHTML = '';
+  document.getElementById('pol-quiz-card').style.display = '';
+  document.getElementById('pol-wrong-book').style.display = 'none';
+}
+
+function selectPolOption(el, qi, oi, quizIdx) {
+  if (polUserAnswers[qi] !== undefined) return; // Already answered
+  polUserAnswers[qi] = oi;
+  const q = politicsQuiz[quizIdx];
+  const correct = oi === q.ans;
+
+  // Mark all options
+  const parent = el.parentElement;
+  parent.querySelectorAll('.quiz-option').forEach((opt, i) => {
+    opt.classList.remove('selected');
+    if (i === q.ans) opt.classList.add('correct');
+    if (i === oi && !correct) opt.classList.add('wrong');
+  });
+  el.classList.add('selected');
+
+  const expDiv = document.getElementById('pol-exp-' + qi);
+  expDiv.style.display = 'block';
+  if (correct) {
+    expDiv.innerHTML = '<span class="tag tag-green">✅ 回答正确！</span><br>' + q.exp;
+  } else {
+    expDiv.innerHTML = '<span class="tag tag-red">❌ 回答错误！正确答案是 ' + q.opts[q.ans].charAt(0) + '</span><br>' + q.exp;
+    // Add to wrong book
+    const alreadyIn = DATA.pol.wrongBook.some(w => w.quizIdx === quizIdx);
+    if (!alreadyIn) {
+      DATA.pol.wrongBook.push({
+        quizIdx: quizIdx,
+        userAnswer: oi,
+        correctAnswer: q.ans,
+        date: getToday(),
+        mastered: false,
+      });
+    }
+  }
+  persist();
+
+  // Check if all answered
+  const indices = DATA.pol.quizIndices;
+  if (Object.keys(polUserAnswers).length >= indices.length) {
+    DATA.pol.quizAnswered = true;
+    const wrongCount = indices.filter((qi2, i) => polUserAnswers[i] !== politicsQuiz[qi2].ans).length;
+    document.getElementById('pol-result').innerHTML =
+      '<div class="mt-md text-center">' +
+      (wrongCount === 0 ? '<span class="tag tag-green">🎉 全部正确！太厉害了！</span>' :
+       '<span class="tag tag-yellow">本次答对 ' + (indices.length - wrongCount) + '/' + indices.length + ' 题</span>') +
+      '</div>';
+    document.getElementById('pol-wrong-count').textContent = DATA.pol.wrongBook.length;
+    persist();
+  }
+}
+
+function switchPoliticsTab(tab) {
+  if (tab === 'wrong') {
+    document.getElementById('pol-quiz-card').style.display = 'none';
+    document.getElementById('pol-wrong-book').style.display = '';
+    renderWrongBook();
+  } else {
+    document.getElementById('pol-quiz-card').style.display = '';
+    document.getElementById('pol-wrong-book').style.display = 'none';
+    renderPoliticsQuiz();
+  }
+}
+
+function renderWrongBook() {
+  const wb = DATA.pol.wrongBook;
+  if (wb.length === 0) {
+    document.getElementById('pol-wrong-list').innerHTML = '<div class="text-center text-muted" style="padding:20px;">暂无错题，继续保持！🎉</div>';
+    return;
+  }
+  let html = '';
+  wb.forEach((w, i) => {
+    const q = politicsQuiz[w.quizIdx];
+    if (!q) return;
+    html += '<div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:1px solid var(--border);' + (w.mastered ? 'opacity:0.5;' : '') + '">' +
+      '<div style="font-weight:600;margin-bottom:8px;">' + q.q + '</div>' +
+      '<div style="font-size:13px;color:var(--danger);">你的答案：' + q.opts[w.userAnswer] + '</div>' +
+      '<div style="font-size:13px;color:var(--success);">正确答案：' + q.opts[w.correctAnswer] + '</div>' +
+      '<div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">' + q.exp + '</div>' +
+      '<div class="mt-sm">' +
+      (w.mastered ? '<span class="tag tag-green">已掌握</span>' :
+       '<button class="btn btn-xs btn-success" onclick="masterWrong(' + i + ')">✅ 标记已掌握</button>') +
+      '</div></div>';
+  });
+  document.getElementById('pol-wrong-list').innerHTML = html;
+  document.getElementById('pol-wrong-count').textContent = wb.filter(w => !w.mastered).length;
+}
+
+function masterWrong(idx) {
+  DATA.pol.wrongBook[idx].mastered = true;
+  persist();
+  renderWrongBook();
+  toast('已标记为掌握！👍');
+}
+
+const hotspots = [
+  { kw: '新质生产力', desc: '习近平总书记提出的重大概念，强调以科技创新为核心驱动力的先进生产力形态。' },
+  { kw: '高质量发展', desc: '全面建设社会主义现代化国家的首要任务，推动经济实现质的有效提升和量的合理增长。' },
+  { kw: '中国式现代化', desc: '中国共产党领导的社会主义现代化，具有人口规模巨大、全体人民共同富裕等五大特征。' },
+  { kw: '文化自信', desc: '更基础、更广泛、更深厚的自信，是一个国家、一个民族发展中最基本、最深沉、最持久的力量。' },
+  { kw: '全过程人民民主', desc: '社会主义民主政治的本质属性，是最广泛、最真实、最管用的民主。' },
+  { kw: '一带一路', desc: '丝绸之路经济带和21世纪海上丝绸之路，推动构建人类命运共同体的重要实践平台。' },
+  { kw: '共同富裕', desc: '社会主义的本质要求，是中国式现代化的重要特征，鼓励勤劳创新致富。' },
+  { kw: '总体国家安全观', desc: '以人民安全为宗旨，以政治安全为根本，统筹外部安全和内部安全、国土安全和国民安全。' },
+  { kw: '双碳目标', desc: '2030年前实现碳达峰、2060年前实现碳中和，是推动绿色低碳转型的重大战略决策。' },
+  { kw: '数字中国', desc: '以数字化转型整体驱动生产方式、生活方式和治理方式变革，建设网络强国、数字中国。' },
+  { kw: '乡村振兴', desc: '全面推进乡村产业、人才、文化、生态、组织振兴，促进农业高质高效、乡村宜居宜业。' },
+  { kw: '大国外交', desc: '推动构建人类命运共同体，坚持和平发展道路，积极参与全球治理体系改革和建设。' },
+  { kw: '教育强国', desc: '坚持教育优先发展，加快建设教育强国、科技强国、人才强国，办好人民满意的教育。' },
+  { kw: '供给侧结构性改革', desc: '以供给侧结构性改革为主线，推动经济发展质量变革、效率变革、动力变革。' },
+  { kw: '全面依法治国', desc: '坚持依法治国、依法执政、依法行政共同推进，法治国家、法治政府、法治社会一体建设。' },
+];
+
+function renderPoliticsHotspot() {
+  const h = hotspots[Math.floor(Math.random() * hotspots.length)];
+  document.getElementById('pol-hotspot').innerHTML =
+    '<span class="tag tag-red">热点</span> <strong>' + h.kw + '</strong>：' + h.desc;
+}
+
+// ==================== 336艺术基础 ====================
+const art336Books = [
+  { name: '艺术学概论', author: '马工程', pub: '高等教育出版社', year: '2019', pages: 360 },
+  { name: '艺术学原理', author: '王一川', pub: '北京师范大学出版社', year: '2021', pages: 340 },
+  { name: '艺术概论', author: '王宏建', pub: '文化艺术出版社', year: '2010', pages: 380 },
+  { name: '艺术概论教程', author: '朱晓军', pub: '中国传媒大学出版社', year: '2021', pages: 320 },
+];
+
+const art336ReciteBank = [
+  { q: '名词解释：艺术起源的"模仿说"', a: '模仿说是最古老的艺术起源学说，由古希腊哲学家德谟克利特和亚里士多德提出。该学说认为艺术起源于人类对自然和社会生活的模仿。模仿是人类的本能和天性，艺术活动就是从模仿中产生的。亚里士多德认为模仿是人的天性，人从模仿中获得快感。这一学说的合理性在于它肯定了艺术与现实的联系，但不足之处是它把模仿归结为人的本能，忽视了社会实践对艺术起源的决定作用。' },
+  { q: '名词解释：艺术起源的"游戏说"', a: '游戏说由德国美学家席勒和英国哲学家斯宾塞提出。该学说认为艺术起源于人类过剩精力的游戏活动。席勒认为，当人的物质需要得到满足后，过剩的精力便驱使人们进行游戏活动，这种自由的游戏活动就是艺术的起源。游戏说的贡献在于揭示了艺术活动的自由性和非功利性特征，但把艺术起源归结为生物本能，忽视了社会实践的作用。' },
+  { q: '名词解释：艺术起源的"巫术说"', a: '巫术说是西方艺术起源理论中最有影响力的一种，由英国人类学家爱德华·泰勒和弗雷泽提出。该学说认为艺术起源于原始人类的巫术活动。原始人认为通过模仿和描绘可以控制自然，因此产生了洞穴壁画、舞蹈等艺术形式。巫术说揭示了原始艺术与原始宗教之间的密切关系，但不能涵盖所有艺术形式的起源。' },
+  { q: '名词解释：艺术起源的"劳动说"', a: '劳动说是马克思主义艺术起源理论的核心观点。该学说认为艺术起源于人类的生产劳动。劳动创造了人本身，也创造了艺术产生的主体条件（灵巧的双手、发达的大脑、语言能力等）。原始艺术的内容和形式都与劳动密切相关，如劳动号子发展为音乐，狩猎舞蹈发展为舞蹈艺术。劳动说从历史唯物主义角度科学地解释了艺术起源问题。' },
+  { q: '简答题：简述艺术与生活的关系', a: '艺术与生活的关系是艺术理论中的核心问题。首先，社会生活是艺术的唯一源泉，一切艺术都来源于生活，艺术家的创作灵感和素材都来自于生活体验。其次，艺术高于生活，艺术不是对生活的简单复制，而是经过艺术家的选择、提炼、加工和创造，比普通的实际生活更高、更强烈、更集中、更典型、更理想。再次，艺术反作用于生活，优秀的艺术作品能够影响人们的思想感情，推动社会进步。最后，艺术与生活是辩证统一的关系，既要深入生活，又要超越生活。' },
+  { q: '名词解释：艺术典型', a: '艺术典型是艺术家通过典型化的方法创造出来的，既具有鲜明独特的个性特征，又深刻揭示社会生活某些本质方面的艺术形象。艺术典型是个性与共性的统一，是通过个别表现一般、通过现象表现本质的艺术形象。如鲁迅笔下的阿Q、巴尔扎克笔下的葛朗台等，都是成功的艺术典型。' },
+  { q: '简答题：简述艺术的社会功能', a: '艺术的社会功能主要包括：1. 审美认识功能——艺术可以帮助人们认识社会生活、历史文化和人类自身；2. 审美教育功能——艺术通过形象感染人的情感，陶冶人的情操，塑造人的灵魂；3. 审美娱乐功能——艺术能给人带来精神愉悦和美的享受；4. 审美交流功能——艺术是人类思想情感交流的重要方式。这些功能相互联系、相互渗透，共同发挥作用。' },
+  { q: '名词解释：艺术流派', a: '艺术流派是指在一定的历史时期内，由一些思想倾向、艺术主张、创作方法和艺术风格相近或相似的艺术家组成的艺术集团或派别。艺术流派的形成需要具备三个条件：一是有一定数量的艺术家群体；二是有共同的艺术主张和创作倾向；三是有代表性的艺术家和作品。如文学中的现实主义流派、浪漫主义流派，美术中的印象派、立体派等。' },
+  { q: '简答题：简述艺术创作的基本过程', a: '艺术创作的基本过程包括三个阶段：1. 艺术体验（准备阶段）——艺术家深入生活、观察体验、积累素材，产生创作冲动；2. 艺术构思（酝酿阶段）——艺术家对生活素材进行选择、提炼、加工，在头脑中形成完整的艺术形象；3. 艺术传达（完成阶段）——艺术家运用特定的物质材料和艺术语言，将头脑中的艺术形象物化为艺术作品。这三个阶段相互联系、相互渗透，构成完整的创作过程。' },
+  { q: '名词解释：艺术风格', a: '艺术风格是指艺术家在创作中表现出来的独特的艺术特色和创作个性。它是艺术家的创作个性在作品的内容和形式上的整体体现，是艺术家成熟的标志。艺术风格具有独特性、稳定性和多样性等特征。艺术风格的形成受到艺术家个人因素（世界观、生活经历、艺术修养等）和社会因素（时代背景、民族传统、文化环境等）的双重影响。' },
+  { q: '名词解释：艺术语言', a: '艺术语言是指各门艺术用以塑造艺术形象、传达审美情感的物质手段和表现方式。不同艺术门类有不同的艺术语言：文学的语言是文字，音乐的语言是声音（旋律、节奏、和声），绘画的语言是线条、色彩和构图，舞蹈的语言是人体动作，电影的语言是画面和声音等。艺术语言是艺术家进行艺术思维和艺术传达的工具。' },
+  { q: '简答题：简述现实主义的基本特征', a: '现实主义是艺术创作的基本方法之一，其基本特征包括：1. 客观性——强调按照生活的本来面貌真实地反映生活；2. 典型性——通过典型化的方法塑造典型环境中的典型人物；3. 批判性——对现实生活中的矛盾和问题进行揭示和批判；4. 人民性——关注普通人的生活和命运。现实主义的代表作家有巴尔扎克、托尔斯泰、鲁迅等。' },
+  { q: '名词解释：艺术欣赏', a: '艺术欣赏是人们对艺术作品进行感受、体验、理解和评判的审美活动。它是艺术活动的最后一个环节，是艺术作品实现其社会价值的重要途径。艺术欣赏的过程一般包括审美感知、审美体验和审美理解三个阶段。艺术欣赏既是一种被动的接受活动，也是一种主动的创造活动，欣赏者在欣赏过程中会根据自己的生活经验和审美经验对作品进行再创造。' },
+  { q: '简答题：简述浪漫主义的基本特征', a: '浪漫主义是18世纪末到19世纪上半叶在欧洲兴起的重要文艺思潮和创作方法，基本特征包括：1. 主观性——强调表现艺术家的主观情感和理想；2. 崇尚自然——赞美大自然的美和力量，提出"回归自然"的口号；3. 重视想象——把想象视为艺术创作的核心能力；4. 追求自由——在内容和形式上追求自由和创新，反对古典主义的束缚。代表艺术家有雨果、德拉克洛瓦、贝多芬等。' },
+  { q: '名词解释：意境', a: '意境是中国传统美学的重要范畴，指艺术作品中呈现的情景交融、虚实相生的审美境界。意境由"意"（艺术家的主观情感）和"境"（客观物象）两部分构成，通过情景交融的方式达到主观与客观、有限与无限的统一。意境的核心特征是"言有尽而意无穷"，追求象外之象、景外之景、韵外之致。意境理论在中国古典诗歌、山水画、园林艺术中体现得尤为充分。' },
+  { q: '简答题：简述艺术与经济基础的关系', a: '艺术与经济基础的关系是马克思主义艺术理论的基本问题。首先，经济基础决定上层建筑，艺术作为上层建筑的一部分，归根到底由经济基础决定。社会经济的发展水平影响艺术的发展水平、内容和形式。其次，艺术具有相对独立性，艺术的发展与经济基础的发展并非完全同步，有时艺术繁荣时期恰恰是经济相对落后的时期（如古希腊艺术）。再次，艺术对经济基础具有反作用，进步的艺术促进经济发展，落后的艺术阻碍经济发展。' },
+  { q: '名词解释：艺术思潮', a: '艺术思潮是指在一定历史时期内，由于社会经济、政治、文化等多种因素的综合影响，在艺术领域中形成的具有广泛影响的思想倾向和创作潮流。艺术思潮比艺术流派范围更大、影响更广，往往跨越多个艺术门类。如古典主义、浪漫主义、现实主义、现代主义、后现代主义等。艺术思潮的兴起和更替反映了社会历史的发展和人们审美观念的变化。' },
+  { q: '简答题：简述艺术美的特征', a: '艺术美的特征主要包括：1. 形象性——艺术美通过具体可感的艺术形象来表现；2. 情感性——艺术美蕴含着艺术家丰富的情感，能够感染和打动欣赏者；3. 创造性——艺术美是艺术家创造性劳动的成果，体现了艺术家的智慧和才华；4. 典型性——艺术美通过典型形象揭示生活的本质和规律；5. 理想性——艺术美体现了艺术家的审美理想和社会理想。艺术美是主观与客观、内容与形式、感性与理性的统一。' },
+  { q: '名词解释：蒙太奇', a: '蒙太奇是法语montage的音译，原为建筑学术语，意为装配、构成。在电影艺术中，蒙太奇是指将分散的镜头按照一定的逻辑和美学原则组接起来，使其产生连贯、对比、联想、悬念等艺术效果的手法。蒙太奇是电影艺术特有的表现手段和思维方式，是电影区别于其他艺术形式的重要标志。苏联导演爱森斯坦和普多夫金对蒙太奇理论做出了重要贡献。' },
+  { q: '简答题：简述艺术批评的作用', a: '艺术批评是对艺术作品、艺术现象进行分析、阐释和评价的活动。其作用包括：1. 帮助欣赏者理解和欣赏艺术作品，提高审美能力；2. 为艺术家提供反馈，促进艺术创作水平的提高；3. 引导艺术创作方向，推动艺术健康发展；4. 丰富和发展艺术理论，推动艺术学科建设；5. 在艺术家和欣赏者之间架起沟通的桥梁。艺术批评应当坚持科学性、公正性和建设性的原则。' },
+  { q: '名词解释：艺术直觉', a: '艺术直觉是艺术家在创作过程中不经过逻辑推理而直接把握对象本质和审美特征的心理能力。艺术直觉具有直接性、快速性、非逻辑性等特点。它是在长期的生活积累和艺术实践基础上形成的，是理性认识内化为感性形式的结果。艺术直觉在艺术创作中起着重要作用，特别是在艺术体验和艺术构思阶段，但它不能完全替代理性思考和生活积累。' },
+  { q: '简答题：简述艺术家应具备的素养', a: '艺术家应具备以下素养：1. 丰富的生活积累——生活是艺术的源泉，艺术家需要有深厚的生活体验；2. 进步的世界观和审美观——这决定艺术家认识生活、评价生活的深度和高度；3. 深厚的文化修养——广博的知识和深厚的文化底蕴是艺术创作的基础；4. 精湛的艺术技巧——熟练掌握本门艺术的创作技法和表现手段；5. 独特的创作个性——形成自己独特的艺术风格和创作特色。这些素养相互联系，共同构成艺术家的创作能力。' },
+  { q: '名词解释：艺术共鸣', a: '艺术共鸣是指欣赏者在欣赏艺术作品时，被作品中的艺术形象所感染，产生与艺术家相同或相似的情感体验和思想共鸣的审美心理现象。共鸣的产生需要两个条件：一是作品本身具有强烈的艺术感染力；二是欣赏者具有相应的生活经验和审美能力。共鸣是艺术欣赏的最高境界，是艺术作品实现其社会功能的重要途径。' },
+  { q: '简答题：简述现代主义艺术的基本特征', a: '现代主义是20世纪上半叶在西方兴起的重要艺术思潮，其基本特征包括：1. 反传统——否定传统的艺术规范和审美标准；2. 主观表现——强调表现艺术家的主观感受和内心世界；3. 形式创新——追求艺术形式和表现手法的大胆创新；4. 荒诞意识——表现现代社会中人的异化和荒诞感；5. 非理性倾向——重视直觉、潜意识和非理性因素在艺术创作中的作用。代表流派有表现主义、超现实主义、意识流小说、抽象派绘画等。' },
+  { q: '名词解释：形象思维', a: '形象思维是艺术创作和欣赏过程中以形象为基本单位的思维方式。与逻辑思维不同，形象思维始终不脱离具体可感的形象，通过对形象的联想、想象、组合和创造来进行思维活动。形象思维具有形象性、想象性、情感性和创造性等特征。形象思维是艺术创作的主要思维方式，但它并不排斥逻辑思维，两者在创作过程中相互补充、相互渗透。' },
+  { q: '简答题：简述继承与创新的关系', a: '继承与创新是艺术发展中辩证统一的关系。继承是创新的基础和前提，任何艺术家都是在继承前人艺术成果的基础上进行创作的，离开了继承，艺术就成了无源之水。创新是继承的目的和发展，没有创新，艺术就会停滞不前。继承不是全盘照搬，而是批判地继承，取其精华、去其糟粕。创新也不是凭空创造，而是在继承基础上的推陈出新。正确处理继承与创新的关系，是艺术健康发展的关键。' },
+  { q: '名词解释：艺术媒介', a: '艺术媒介是指艺术家在创作过程中所使用的物质材料和表现手段，是沟通艺术家与欣赏者的桥梁。不同艺术门类使用不同的媒介：绘画使用画布、颜料，雕塑使用石头、金属，音乐使用声音，文学使用语言，电影使用影像和声音等。艺术媒介不仅承载着艺术信息，其本身的特性也影响着艺术的表现方式和审美效果。现代艺术越来越重视媒介本身的审美价值。' },
+  { q: '简答题：简述艺术与宗教的关系', a: '艺术与宗教在人类历史上有着密切的关系。一方面，宗教对艺术的发展产生了深远的影响：宗教为艺术提供了丰富的题材和内容；宗教活动为艺术创作提供了场所和需求；宗教情感激发了艺术家的创作灵感。另一方面，艺术也服务于宗教：艺术是宗教宣传和教化的重要手段；宗教建筑、雕塑、绘画、音乐等本身就是宗教艺术的杰作。随着社会的发展，艺术逐渐从宗教中独立出来，获得了自主发展的空间。' },
+  { q: '名词解释：接受美学', a: '接受美学是20世纪60年代由德国美学家姚斯和伊瑟尔创立的文学理论流派。该理论将研究重心从作者和作品转向读者（接受者），强调读者在文学活动中的主动性和创造性作用。接受美学认为，文学作品的意义不是固定不变的，而是在读者的阅读过程中动态生成的；作品存在许多"空白"和"未定点"，需要读者用自己的想象和经验去填充。接受美学对理解艺术欣赏活动具有重要的启发意义。' },
+  { q: '简答题：简述艺术教育的意义', a: '艺术教育是素质教育的重要组成部分，其意义体现在：1. 培养审美能力——提高人们对美的感受、鉴赏和创造能力；2. 陶冶道德情操——优秀的艺术作品能够净化人的心灵，提升道德修养；3. 开发智力潜能——艺术活动能够促进人的形象思维、创造力和想象力发展；4. 促进身心健康——艺术活动具有心理疏导和情感宣泄的功能；5. 传承文化传统——艺术教育是民族文化传承的重要途径。' },
+];
+
+function renderArt336() {
+  // Books
+  let html = '';
+  art336Books.forEach((b, i) => {
+    const current = DATA.art336.bookPages[i] || 0;
+    const pct = Math.round((current / b.pages) * 100);
+    html += '<div style="margin-bottom:18px;">' +
+      '<div class="flex-between mb-sm"><span style="font-weight:600;">' + b.name + '</span><span class="text-sm text-muted">' + b.author + ' · ' + b.pub + b.year + '版</span></div>' +
+      '<div class="text-sm text-muted mb-sm">总页数：' + b.pages + ' 页 | 已读 <strong style="color:var(--accent);">' + pct + '%</strong> · 还剩 <strong style="color:var(--warning);">' + (100-pct) + '%</strong> 未读</div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;"></div></div>' +
+      '<div class="flex-row gap-sm mt-sm">' +
+      '<span class="text-sm text-muted">当前读到第</span>' +
+      '<input type="number" min="0" max="' + b.pages + '" value="' + current + '" id="art336-pg-' + i + '" style="max-width:70px;">' +
+      '<span class="text-sm text-muted">页</span>' +
+      '<button class="btn btn-xs" onclick="updateArt336Page(' + i + ')">更新</button>' +
+      '</div></div>';
+  });
+  document.getElementById('art336-books').innerHTML = html;
+
+  // Recite
+  document.getElementById('art336-review-count').textContent = '待复习: ' + DATA.art336.reciteQueue.length;
+  renderReciteCard();
+
+  // Note
+  document.getElementById('art336-note').value = DATA.art336.note || '';
+}
+
+function updateArt336Page(idx) {
+  const input = document.getElementById('art336-pg-' + idx);
+  const max = art336Books[idx].pages;
+  DATA.art336.bookPages[idx] = Math.min(max, Math.max(0, parseInt(input.value) || 0));
+  persist();
+  renderArt336();
+}
+
+function renderReciteCard() {
+  let idx = DATA.art336.currentReciteIndex;
+  if (idx < 0 || idx >= art336ReciteBank.length) {
+    // Pick random, prefer review queue
+    if (DATA.art336.reciteQueue.length > 0) {
+      idx = DATA.art336.reciteQueue[0];
+      DATA.art336.reciteQueue.shift();
+    } else {
+      // Random from non-mastered
+      const pool = art336ReciteBank.map((_,i) => i).filter(i => !DATA.art336.masteredIndices.includes(i));
+      if (pool.length === 0) {
+        document.getElementById('art336-recite').innerHTML = '<div class="text-center text-muted" style="padding:20px;">🎉 所有题目已掌握！</div>';
+        return;
+      }
+      idx = pool[Math.floor(Math.random() * pool.length)];
+    }
+    DATA.art336.currentReciteIndex = idx;
+    persist();
+  }
+
+  const item = art336ReciteBank[idx];
+  document.getElementById('art336-recite').innerHTML =
+    '<div class="recite-card">' +
+    '<div class="question">' + item.q + '</div>' +
+    '<div class="flex-row gap-sm mb-sm">' +
+    '<button class="btn btn-sm" onclick="showReciteAnswer()">💡 显示答案</button>' +
+    '<button class="btn btn-sm btn-ghost" onclick="nextReciteCard()">🔄 换一题</button>' +
+    '</div>' +
+    '<div class="answer" id="recite-answer">' + item.a + '</div>' +
+    '<div class="flex-row gap-sm mt-sm" id="recite-actions" style="display:none;">' +
+    '<button class="btn btn-sm btn-success" onclick="markReciteMastered(' + idx + ')">✅ 已记住</button>' +
+    '<button class="btn btn-sm btn-warning" onclick="markReciteReview(' + idx + ')">📝 待复习</button>' +
+    '</div></div>';
+}
+
+function showReciteAnswer() {
+  document.getElementById('recite-answer').classList.add('show');
+  document.getElementById('recite-actions').style.display = 'flex';
+}
+
+function markReciteMastered(idx) {
+  if (!DATA.art336.masteredIndices.includes(idx)) DATA.art336.masteredIndices.push(idx);
+  DATA.art336.reciteQueue = DATA.art336.reciteQueue.filter(i => i !== idx);
+  DATA.art336.currentReciteIndex = -1;
+  persist();
+  toast('已标记为记住！👍');
+  renderArt336();
+}
+
+function markReciteReview(idx) {
+  if (!DATA.art336.reciteQueue.includes(idx)) DATA.art336.reciteQueue.push(idx);
+  DATA.art336.currentReciteIndex = -1;
+  persist();
+  toast('已加入明日复习队列 📝');
+  renderArt336();
+}
+
+function nextReciteCard() {
+  DATA.art336.currentReciteIndex = -1;
+  persist();
+  renderArt336();
+}
+
+function saveArt336Note() {
+  DATA.art336.note = document.getElementById('art336-note').value;
+  persist();
+  toast('学习记录已保存！💾');
+}
+
+// ==================== 998专业综合 ====================
+const prof998Books = [
+  { name: '当代广播电视概论', author: '陆晔', pub: '复旦大学出版社', year: '2021', pages: 420 },
+  { name: '电视节目策划学', author: '胡智锋', pub: '复旦大学出版社', year: '2023', pages: 280 },
+  { name: '影视剪辑教程', author: '姚争', pub: '浙江大学出版社', year: '2022', pages: 350 },
+  { name: '影视声音创作艺术', author: '伍建阳', pub: '', year: '', pages: 300 },
+];
+
+function renderProf998() {
+  let html = '';
+  prof998Books.forEach((b, i) => {
+    const current = DATA.prof998.bookPages[i] || 0;
+    const pct = Math.round((current / b.pages) * 100);
+    const pubStr = b.pub ? (b.pub + (b.year ? b.year + '版' : '')) : '';
+    html += '<div style="margin-bottom:18px;">' +
+      '<div class="flex-between mb-sm"><span style="font-weight:600;">' + b.name + '</span><span class="text-sm text-muted">' + b.author + (pubStr ? ' · ' + pubStr : '') + '</span></div>' +
+      '<div class="text-sm text-muted mb-sm">总页数：' + b.pages + ' 页 | 已读 <strong style="color:var(--accent);">' + pct + '%</strong> · 还剩 <strong style="color:var(--warning);">' + (100-pct) + '%</strong> 未读</div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;"></div></div>' +
+      '<div class="flex-row gap-sm mt-sm">' +
+      '<span class="text-sm text-muted">当前读到第</span>' +
+      '<input type="number" min="0" max="' + b.pages + '" value="' + current + '" id="prof998-pg-' + i + '" style="max-width:70px;">' +
+      '<span class="text-sm text-muted">页</span>' +
+      '<button class="btn btn-xs" onclick="updateProf998Page(' + i + ')">更新</button>' +
+      '</div></div>';
+  });
+  document.getElementById('prof998-books').innerHTML = html;
+
+  // Software progress — 改为每日练习时长累计
+  const logs = DATA.prof998.softwareLogs || {};
+  const today = getToday();
+  const todayMins = logs[today] || 0;
+  const totalMins = Object.values(logs).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  const totalDays = Object.keys(logs).filter(d => (logs[d]||0) > 0).length;
+
+  // 软件任务清单
+  const checklist = [
+    { id: 'install', label: '安装 Cubase / Pro Tools 并完成基础配置' },
+    { id: 'interface', label: '熟悉软件界面布局和基本操作' },
+    { id: 'midi', label: '掌握 MIDI 录制与编辑' },
+    { id: 'audio', label: '掌握音频录制与剪辑' },
+    { id: 'mixer', label: '学会使用调音台和效果器' },
+    { id: 'automation', label: '掌握自动化控制（Automation）' },
+    { id: 'export', label: '学会导出/混音输出' },
+    { id: 'project', label: '完成一个完整的音频制作项目' },
+  ];
+  const completed = DATA.prof998.softwareChecklist || {};
+  const doneCount = checklist.filter(c => completed[c.id]).length;
+
+  document.getElementById('prof998-software').innerHTML =
+    '<div class="software-log">' +
+    '<div class="flex-between mb-sm"><span style="font-weight:600;">📊 练习统计</span><span class="tag tag-green">已坚持 ' + totalDays + ' 天</span></div>' +
+    '<div class="sw-stat">' +
+    '<div class="sw-stat-item"><div class="sw-val">' + totalMins + '</div><div class="sw-lbl">累计分钟</div></div>' +
+    '<div class="sw-stat-item"><div class="sw-val">' + (totalMins/60).toFixed(1) + '</div><div class="sw-lbl">累计小时</div></div>' +
+    '<div class="sw-stat-item"><div class="sw-val">' + totalDays + '</div><div class="sw-lbl">练习天数</div></div>' +
+    '</div>' +
+    '<div class="flex-row gap-sm mt-md">' +
+    '<span class="text-sm text-muted">今日练习：</span>' +
+    '<input type="number" min="0" max="480" value="' + todayMins + '" id="prof998-sw" placeholder="分钟" style="max-width:80px;">' +
+    '<span class="text-sm text-muted">分钟</span>' +
+    '<button class="btn btn-xs" onclick="logSoftwareTime()">记录</button>' +
+    '</div>' +
+    '<div class="mt-sm"><button class="btn btn-xs btn-ghost" onclick="addQuickTime(15)">+15分钟</button> ' +
+    '<button class="btn btn-xs btn-ghost" onclick="addQuickTime(30)">+30分钟</button> ' +
+    '<button class="btn btn-xs btn-ghost" onclick="addQuickTime(60)">+1小时</button></div>' +
+    '</div>' +
+    '<div class="software-checklist">' +
+    '<div class="flex-between mb-sm"><span style="font-weight:600;">✅ 技能清单</span><span class="text-sm text-muted">' + doneCount + '/' + checklist.length + '</span></div>' +
+    '<div class="progress-bar"><div class="progress-fill" style="width:' + (doneCount/checklist.length*100) + '%;background:var(--success);"></div></div>' +
+    checklist.map(c => '<div class="check-item' + (completed[c.id]?' done':'') + '">' +
+      '<input type="checkbox" ' + (completed[c.id]?'checked':'') + ' onchange="toggleSoftwareCheck(\'' + c.id + '\')">' +
+      '<span>' + c.label + '</span>' +
+      (completed[c.id] ? '<span class="tag tag-green" style="margin-left:auto;">已完成</span>' : '') +
+    '</div>').join('') +
+    '</div>';
+
+  document.getElementById('prof998-note').value = DATA.prof998.note || '';
+}
+
+function updateProf998Page(idx) {
+  const input = document.getElementById('prof998-pg-' + idx);
+  const max = prof998Books[idx].pages;
+  DATA.prof998.bookPages[idx] = Math.min(max, Math.max(0, parseInt(input.value) || 0));
+  persist();
+  renderProf998();
+}
+
+function logSoftwareTime() {
+  const input = document.getElementById('prof998-sw');
+  const mins = Math.min(480, Math.max(0, parseInt(input.value) || 0));
+  const today = getToday();
+  if (!DATA.prof998.softwareLogs) DATA.prof998.softwareLogs = {};
+  DATA.prof998.softwareLogs[today] = (DATA.prof998.softwareLogs[today] || 0) + mins;
+  persist();
+  toast('已记录 ' + mins + ' 分钟练习！🎛️');
+  renderProf998();
+}
+
+function addQuickTime(mins) {
+  const input = document.getElementById('prof998-sw');
+  const current = parseInt(input.value) || 0;
+  input.value = current + mins;
+  logSoftwareTime();
+}
+
+function toggleSoftwareCheck(id) {
+  if (!DATA.prof998.softwareChecklist) DATA.prof998.softwareChecklist = {};
+  DATA.prof998.softwareChecklist[id] = !DATA.prof998.softwareChecklist[id];
+  persist();
+  renderProf998();
+}
+
+function saveProf998Note() {
+  DATA.prof998.note = document.getElementById('prof998-note').value;
+  persist();
+  toast('学习记录已保存！💾');
+}
+
+// ==================== 教资面试 ====================
+const teacherStructBank = [
+  { q: '你为什么要当一名音乐老师？', a: '我选择当一名音乐老师，首先是因为我热爱音乐教育事业。音乐不仅是一门艺术，更是培养学生审美能力、创造力和情感表达能力的重要途径。我希望通过自己的专业知识和热情，激发学生对音乐的兴趣，帮助他们在音乐学习中获得快乐和成长。其次，我具备扎实的音乐专业基础和教学能力，能够胜任音乐教学工作。最后，我认为教师是一份充满意义的职业，能够见证学生的进步和成长，这本身就是一种幸福。' },
+  { q: '如果学生在音乐课上捣乱，你会怎么处理？', a: '面对学生在音乐课上捣乱的情况，我会采取以下措施：首先，保持冷静，用眼神或走近的方式给予提醒，尽量不打断正常教学。其次，如果行为持续，我会利用教学间隙与该生进行简短沟通，了解原因。课后我会单独找他谈话，以关心的态度了解他的想法，同时明确课堂纪律要求。我还会反思自己的教学是否足够吸引学生，调整教学方法增加趣味性和互动性。如果问题持续，我会与班主任和家长沟通，形成教育合力。' },
+  { q: '谈谈你对音乐核心素养的理解。', a: '音乐核心素养主要包括审美感知、艺术表现、创意实践和文化理解四个方面。审美感知是指学生对音乐艺术的感受、理解和鉴赏能力；艺术表现是指学生通过演唱、演奏等实践活动表达音乐的能力；创意实践强调学生的音乐创造力和即兴表达能力；文化理解是指学生理解音乐与历史、文化、社会生活的关系。这四个方面相互联系，共同构成音乐学科的核心素养体系。在教学中，我会通过丰富的音乐实践活动，全面提升学生的音乐核心素养。' },
+  { q: '如何在音乐教学中培养学生的审美能力？', a: '培养学生的音乐审美能力可以从以下几个方面入手：第一，精选优秀的音乐作品作为教学素材，让学生接触不同风格、不同时期的经典音乐；第二，引导学生从旋律、节奏、和声、音色等音乐要素入手，学会分析和感受音乐的美；第三，创设情境，让学生沉浸在音乐氛围中，激发情感共鸣；第四，鼓励学生表达自己对音乐的感受和理解，尊重个性化的审美体验；第五，将音乐与其他艺术形式相结合，拓展学生的审美视野。' },
+  { q: '如果你在课堂上唱错了一个音，学生指出了，你怎么办？', a: '面对这种情况，我会坦然承认错误，并感谢学生的细心指出。我会说"谢谢你的提醒，老师也是会犯错的，让我们一起重新来一遍正确的。"这样做既体现了教师的诚实和谦逊，也为学生树立了敢于承认错误的榜样。同时，我会把这个小插曲转化为教学契机，借机强调正确音准的重要性，甚至可以让全班同学一起来辨别和纠正，增加课堂互动。' },
+  { q: '如何在音乐课中照顾到不同音乐基础的学生？', a: '我会采用分层教学的方法。对于基础较弱的学生，我会设计更简单的音乐活动，如节奏模仿、简单的歌曲演唱，多给予鼓励和肯定，建立他们的信心；对于基础较好的学生，我会提供更具挑战性的任务，如多声部合唱、即兴创作、乐器演奏等，满足他们的学习需求。在课堂中我会灵活分组，让不同水平的学生互相帮助、共同进步。同时，我会关注每个学生的进步，用发展的眼光看待每个孩子。' },
+  { q: '你如何看待"没有教不好的学生，只有不会教的老师"这句话？', a: '这句话体现了教育者的责任感和对学生的信任，我认同其中的积极意义——教师应该不断反思和改进教学方法，不轻易放弃任何一个学生。但同时，我认为这句话也不能被绝对化理解。学生的成长受到家庭、社会、个人等多方面因素的影响，教师不是唯一变量。作为教师，我会尽最大努力帮助每一个学生，但也需要理性看待教育的复杂性，与家长、社会共同努力，为学生创造良好的成长环境。' },
+  { q: '谈谈音乐教育在素质教育中的地位和作用。', a: '音乐教育是素质教育的重要组成部分。首先，音乐教育能够培养学生的审美能力和艺术素养，丰富他们的精神世界；其次，音乐活动如合唱、合奏等能够培养学生的团队协作能力和社会交往能力；再次，音乐学习需要持之以恒的练习，能够锻炼学生的毅力和专注力；此外，音乐与数学、语言、历史等学科有着密切的联系，有助于促进学生的全面发展。可以说，没有音乐教育的素质教育是不完整的。' },
+  { q: '如果学校要取消音乐课改上文化课，你怎么看？', a: '我坚决反对这种做法。音乐课不是可有可无的"副科"，而是培养学生全面发展的重要课程。音乐教育能够提升学生的审美素养、创造力和情感表达能力，这些是文化课无法替代的。而且研究表明，音乐学习对大脑发育、记忆力、专注力都有积极影响，反而能促进其他学科的学习。如果学校确实面临课时压力，我会建议优化课程安排而非取消，比如提高课堂效率、开展音乐社团活动等，确保音乐教育不被边缘化。' },
+  { q: '你会如何设计一节高中音乐鉴赏课？', a: '我会按照"导入—聆听—分析—拓展—总结"的流程来设计。导入环节通过一个有趣的问题或一段视频吸引学生注意力；聆听环节让学生完整聆听音乐作品，获得整体感受；分析环节引导学生从旋律、节奏、和声、曲式等角度深入理解作品；拓展环节联系作品的时代背景、作曲家生平等，拓宽学生视野；最后总结回顾，并布置开放性的课后思考题。整个过程中我会注重学生的主动参与和自主表达，避免"满堂灌"。' },
+  { q: '学生说"我不喜欢音乐，音乐课没意思"，你怎么办？', a: '首先我会了解学生不喜欢音乐的具体原因——是之前有过不愉快的音乐学习经历，还是对目前的课程内容不感兴趣。然后我会尝试调整教学策略：了解学生平时喜欢听什么类型的音乐，从中找到切入点；设计更多互动性和参与感强的课堂活动；用学生熟悉的流行音乐作为桥梁，引导他们逐步接触更多元的音乐类型。我也会私下和这位学生聊聊，让他感受到老师的关心，慢慢建立对音乐课的兴趣。' },
+  { q: '在音乐课上如何有效运用多媒体技术？', a: '多媒体技术是音乐教学的有力辅助工具。我会合理运用：播放高清音视频素材让学生直观感受音乐的魅力；使用音乐软件展示乐谱、分析曲式结构；利用互动白板进行节奏游戏和音乐创作活动；通过网络资源拓展学生的音乐视野。但我会注意不过度依赖多媒体，不能让技术喧宾夺主——音乐课的核心永远是聆听、感受和实践，技术只是辅助手段。' },
+  { q: '谈谈你对"以美育人"的理解。', a: '"以美育人"是指通过美的教育来培养人、塑造人。在音乐教育中，这意味着不仅要教给学生音乐知识和技能，更要通过音乐之美来陶冶他们的情操、丰富他们的情感、提升他们的精神境界。具体来说，我会选择具有高度艺术价值和人文内涵的音乐作品作为教学内容；引导学生在音乐中感受美、发现美、创造美；将音乐教育与德育、智育有机结合，促进学生全面发展。"以美育人"的核心是让美成为教育的力量，让教育成为美的过程。' },
+  { q: '如果班级合唱比赛你们班没获奖，学生很失落，你怎么安慰？', a: '首先我会肯定全班同学的努力和付出，告诉他们"老师为你们的认真和团结感到骄傲"。然后我会引导大家回顾整个准备过程中收获的快乐和成长——比如团队合作、音乐技能的提升等，这些比名次更珍贵。我还会播放比赛录像，让大家看到自己的进步和闪光点。最后我会和学生一起总结经验，讨论下次如何做得更好。关键是要让学生明白：比赛的真正意义不在于输赢，而在于过程中的成长和体验。' },
+  { q: '你认为高中音乐教师最重要的素质是什么？', a: '我认为高中音乐教师最重要的素质包括：第一，扎实的专业功底——这是教学的基础，包括演唱、演奏、音乐理论等方面的能力；第二，热爱教育和热爱学生——只有真心热爱，才能投入热情和精力；第三，良好的沟通和课堂管理能力——高中生的独立意识强，需要教师善于引导而非强制；第四，持续学习的能力——音乐和教育都在不断发展，教师需要不断更新知识和教学方法；第五，人格魅力——音乐教师的气质和修养本身就是一种教育力量。' },
+];
+
+function getDailyStructIndices() {
+  const today = getToday();
+  if (DATA.teacher.lastStructDate === today && DATA.teacher.structIndices.length > 0) {
+    return DATA.teacher.structIndices;
+  }
+  const pool = [...Array(teacherStructBank.length).keys()];
+  const indices = [];
+  while (indices.length < 3) {
+    const r = Math.floor(Math.random() * pool.length);
+    if (!indices.includes(pool[r])) indices.push(pool[r]);
+  }
+  DATA.teacher.structIndices = indices;
+  DATA.teacher.lastStructDate = today;
+  persist();
+  return indices;
+}
+
+function renderTeacher() {
+  // 练琴统计
+  const pianoLogs = DATA.teacher.pianoLogs || {};
+  const today = getToday();
+  const todayPiano = pianoLogs[today] || 0;
+  const totalPianoMins = Object.values(pianoLogs).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  const pianoDays = Object.keys(pianoLogs).filter(d => (pianoLogs[d]||0) > 0).length;
+  document.getElementById('teacher-piano-days').textContent = '练琴 ' + pianoDays + ' 天';
+  document.getElementById('teacher-piano-stats').innerHTML =
+    '<div class="sw-stat">' +
+    '<div class="sw-stat-item"><div class="sw-val">' + totalPianoMins + '</div><div class="sw-lbl">累计分钟</div></div>' +
+    '<div class="sw-stat-item"><div class="sw-val">' + (totalPianoMins/60).toFixed(1) + '</div><div class="sw-lbl">累计小时</div></div>' +
+    '<div class="sw-stat-item"><div class="sw-val">' + pianoDays + '</div><div class="sw-lbl">练琴天数</div></div>' +
+    '<div class="sw-stat-item"><div class="sw-val">' + todayPiano + '</div><div class="sw-lbl">今日分钟</div></div>' +
+    '</div>';
+
+  // 说课练习
+  const speechNote = DATA.teacher.speechNote || '';
+  document.getElementById('teacher-speech').innerHTML =
+    '<textarea id="teacher-speech-input" placeholder="记录今天的说课练习内容，如：&#10;1. 说课课题：《XXX》&#10;2. 教学目标和重难点&#10;3. 教学流程设计&#10;4. 自我评价与反思">' + speechNote + '</textarea>' +
+    '<div class="mt-sm"><button class="btn btn-sm" onclick="saveSpeechNote()">💾 保存说课记录</button></div>';
+
+  // 结构化问题
+  const structIndices = getDailyStructIndices();
+  document.getElementById('teacher-struct').innerHTML = structIndices.map((si, i) => {
+    const item = teacherStructBank[si];
+    return '<div class="recite-card">' +
+      '<div class="question">第' + (i+1) + '题：' + item.q + '</div>' +
+      '<button class="btn btn-sm btn-outline mb-sm" onclick="showStructAnswer(' + i + ')">💡 显示参考答案</button>' +
+      '<div class="answer" id="struct-answer-' + i + '">' + item.a + '</div>' +
+      '</div>';
+  }).join('') + '<div class="mt-sm"><button class="btn btn-sm btn-ghost" onclick="refreshStruct()">🔄 换一组题</button></div>';
+}
+
+function logPianoTime() {
+  const input = document.getElementById('teacher-piano-mins');
+  const mins = Math.min(480, Math.max(0, parseInt(input.value) || 0));
+  if (mins === 0) return;
+  const today = getToday();
+  if (!DATA.teacher.pianoLogs) DATA.teacher.pianoLogs = {};
+  DATA.teacher.pianoLogs[today] = (DATA.teacher.pianoLogs[today] || 0) + mins;
+  input.value = '';
+  persist();
+  toast('已记录练琴 ' + mins + ' 分钟！🎹');
+  renderTeacher();
+}
+
+function quickPiano(mins) {
+  const input = document.getElementById('teacher-piano-mins');
+  input.value = mins;
+  logPianoTime();
+}
+
+function saveSpeechNote() {
+  DATA.teacher.speechNote = document.getElementById('teacher-speech-input').value;
+  persist();
+  toast('说课记录已保存！🗣️');
+}
+
+function showStructAnswer(i) {
+  document.getElementById('struct-answer-' + i).classList.add('show');
+}
+
+function refreshStruct() {
+  DATA.teacher.structIndices = [];
+  DATA.teacher.lastStructDate = '';
+  persist();
+  renderTeacher();
+}
+
+// ==================== 每日复盘 ====================
+function renderReview() {
+  document.getElementById('review-done').value = DATA.review.done || '';
+  document.getElementById('review-problem').value = DATA.review.problem || '';
+  document.getElementById('review-tomorrow').value = DATA.review.tomorrow || '';
+  document.getElementById('review-hours').value = DATA.review.hours || '';
+}
+
+function saveReview() {
+  DATA.review.done = document.getElementById('review-done').value;
+  DATA.review.problem = document.getElementById('review-problem').value;
+  DATA.review.tomorrow = document.getElementById('review-tomorrow').value;
+  const hours = parseFloat(document.getElementById('review-hours').value) || 0;
+  DATA.review.hours = hours;
+  if (hours > 0) {
+    const today = getToday();
+    DATA.studyHours[today] = hours;
+  }
+  persist();
+  toast('复盘已保存！明天继续加油！💪');
+}
+
+// ==================== 学习数据 ====================
+function renderData() {
+  // Stats
+  const totalCheckins = Object.keys(DATA.checkins).length;
+  const engStreak = DATA.eng.streak || 0;
+  const totalStudyHours = Object.values(DATA.studyHours).reduce((a,b) => a + parseFloat(b||0), 0).toFixed(1);
+
+  document.getElementById('data-stats').innerHTML =
+    '<div class="card stat-card"><div class="value">' + totalCheckins + '</div><div class="label">📅 总打卡天数</div></div>' +
+    '<div class="card stat-card"><div class="value">' + engStreak + '</div><div class="label">🔥 连续打卡</div></div>' +
+    '<div class="card stat-card"><div class="value">' + totalStudyHours + 'h</div><div class="label">⏱️ 累计学习时长</div></div>';
+
+  // Calendar
+  const now = new Date();
+  renderCalendar('data-calendar', now.getFullYear(), now.getMonth(), DATA.checkins);
+
+  // Weekly chart
+  renderWeeklyChart();
+}
+
+function renderWeeklyChart() {
+  const container = document.getElementById('data-chart');
+  if (!container) return;
+
+  const days = [];
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + mondayOffset + i);
+    const dateStr = d.toISOString().split('T')[0];
+    days.push({
+      label: ['一','二','三','四','五','六','日'][i],
+      date: dateStr,
+      hours: DATA.studyHours[dateStr] || 0,
+      isToday: dateStr === getToday(),
+    });
+  }
+
+  const maxH = Math.max(...days.map(d => d.hours), 1);
+  const w = 600, h = 200, padL = 40, padR = 20, padT = 20, padB = 30;
+  const cw = w - padL - padR, ch = h - padT - padB;
+  const barW = Math.min(50, cw / 7 - 8);
+
+  let svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
+  // Grid lines
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + ch - (ch * i / 4);
+    svg += '<line x1="' + padL + '" y1="' + y + '" x2="' + (w-padR) + '" y2="' + y + '" stroke="#334155" stroke-width="1"/>';
+    svg += '<text x="' + (padL-8) + '" y="' + (y+4) + '" text-anchor="end" fill="#64748b" font-size="10">' + (maxH*i/4).toFixed(1) + 'h</text>';
+  }
+  // Bars
+  days.forEach((d, i) => {
+    const x = padL + (cw / 7) * i + (cw / 7 - barW) / 2;
+    const barH = d.hours > 0 ? (d.hours / maxH) * ch : 2;
+    const y = padT + ch - barH;
+    const color = d.isToday ? '#38bdf8' : '#818cf8';
+    svg += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + barH + '" rx="4" fill="' + color + '" opacity="0.8"/>';
+    if (d.hours > 0) {
+      svg += '<text x="' + (x + barW/2) + '" y="' + (y-5) + '" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600">' + d.hours + 'h</text>';
+    }
+    svg += '<text x="' + (x + barW/2) + '" y="' + (h-10) + '" text-anchor="middle" fill="' + (d.isToday?'#38bdf8':'#64748b') + '" font-size="11" font-weight="' + (d.isToday?'600':'400') + '">' + d.label + '</text>';
+  });
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+// ==================== 主题系统 ====================
+const themePresets = {
+  dark: {
+    name: '深色默认', icon: '🌙',
+    bg: '#0f172a', bgCard: '#1e293b', bgNav: '#0b1120',
+    text: '#e2e8f0', textSecondary: '#94a3b8', textMuted: '#64748b',
+    accent: '#38bdf8', accent2: '#818cf8', accent3: '#f472b6',
+    success: '#4ade80', warning: '#fbbf24', danger: '#f87171',
+    border: '#334155', bgImage: '',
+  },
+  light: {
+    name: '浅色清新', icon: '☀️',
+    bg: '#f8fafc', bgCard: '#ffffff', bgNav: '#f1f5f9',
+    text: '#1e293b', textSecondary: '#475569', textMuted: '#94a3b8',
+    accent: '#0284c7', accent2: '#6366f1', accent3: '#db2777',
+    success: '#16a34a', warning: '#d97706', danger: '#dc2626',
+    border: '#e2e8f0', bgImage: '',
+  },
+  warm: {
+    name: '暖色调', icon: '🔥',
+    bg: '#1c1917', bgCard: '#292524', bgNav: '#1a1715',
+    text: '#fafaf9', textSecondary: '#d6d3d1', textMuted: '#a8a29e',
+    accent: '#fb923c', accent2: '#fbbf24', accent3: '#f472b6',
+    success: '#a3e635', warning: '#facc15', danger: '#ef4444',
+    border: '#44403c', bgImage: '',
+  },
+  forest: {
+    name: '森林绿', icon: '🌿',
+    bg: '#0a1c14', bgCard: '#0f2a1f', bgNav: '#07140e',
+    text: '#dcfce7', textSecondary: '#86efac', textMuted: '#4ade80',
+    accent: '#34d399', accent2: '#6ee7b7', accent3: '#fbbf24',
+    success: '#4ade80', warning: '#facc15', danger: '#f87171',
+    border: '#166534', bgImage: '',
+  },
+  purple: {
+    name: '紫罗兰', icon: '💜',
+    bg: '#180828', bgCard: '#241038', bgNav: '#100520',
+    text: '#f3e8ff', textSecondary: '#c4b5fd', textMuted: '#8b5cf6',
+    accent: '#a78bfa', accent2: '#c084fc', accent3: '#f472b6',
+    success: '#86efac', warning: '#fde047', danger: '#f87171',
+    border: '#4c1d95', bgImage: '',
+  },
+  ocean: {
+    name: '海洋蓝', icon: '🌊',
+    bg: '#0c1929', bgCard: '#152238', bgNav: '#091420',
+    text: '#e0f2fe', textSecondary: '#7dd3fc', textMuted: '#38bdf8',
+    accent: '#0ea5e9', accent2: '#06b6d4', accent3: '#2dd4bf',
+    success: '#34d399', warning: '#fbbf24', danger: '#f87171',
+    border: '#1e3a5f', bgImage: '',
+  },
+};
+
+function applyTheme(themeData) {
+  const root = document.documentElement;
+  root.style.setProperty('--bg', themeData.bg);
+  root.style.setProperty('--bg-card', themeData.bgCard);
+  root.style.setProperty('--bg-nav', themeData.bgNav);
+  root.style.setProperty('--text', themeData.text);
+  root.style.setProperty('--text-secondary', themeData.textSecondary);
+  root.style.setProperty('--text-muted', themeData.textMuted);
+  root.style.setProperty('--accent', themeData.accent);
+  root.style.setProperty('--accent2', themeData.accent2);
+  root.style.setProperty('--accent3', themeData.accent3);
+  root.style.setProperty('--success', themeData.success);
+  root.style.setProperty('--warning', themeData.warning);
+  root.style.setProperty('--danger', themeData.danger);
+  root.style.setProperty('--border', themeData.border);
+
+  // 背景图
+  if (themeData.bgImage) {
+    document.body.style.backgroundImage = 'url(' + themeData.bgImage + ')';
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundAttachment = 'fixed';
+    // 给卡片加半透明效果
+    root.style.setProperty('--bg-card', themeData.bgCard + 'dd');
+    root.style.setProperty('--bg-nav', themeData.bgNav + 'ee');
+  } else {
+    document.body.style.backgroundImage = '';
+    document.body.style.backgroundSize = '';
+    document.body.style.backgroundPosition = '';
+    document.body.style.backgroundAttachment = '';
+    root.style.setProperty('--bg-card', themeData.bgCard);
+    root.style.setProperty('--bg-nav', themeData.bgNav);
+  }
+}
+
+function loadTheme() {
+  const t = DATA.theme || {};
+  const preset = themePresets[t.preset] || themePresets['dark'];
+  const merged = { ...preset };
+  if (t.colors) {
+    for (const k of Object.keys(t.colors)) {
+      if (t.colors[k]) merged[k] = t.colors[k];
+    }
+  }
+  if (t.bgImage) merged.bgImage = t.bgImage;
+  applyTheme(merged);
+}
+
+function openThemePanel() {
+  const panel = document.getElementById('theme-modal');
+  panel.classList.add('show');
+
+  const t = DATA.theme || {};
+  const currentPreset = t.preset || 'dark';
+
+  // Presets
+  document.getElementById('theme-presets').innerHTML = Object.entries(themePresets).map(([k,v]) =>
+    '<div class="theme-preset' + (k === currentPreset ? ' active' : '') +
+    '" style="background:' + v.bgCard + ';border-color:' + v.accent + ';" ' +
+    'onclick="selectThemePreset(\'' + k + '\')" title="' + v.name + '">' + v.icon + '</div>'
+  ).join('');
+
+  // Color pickers
+  const currentTheme = { ...themePresets[currentPreset], ...(t.colors||{}), bgImage: t.bgImage||'' };
+  const colorKeys = [
+    { key: 'bg', label: '背景色' },
+    { key: 'bgCard', label: '卡片色' },
+    { key: 'bgNav', label: '导航栏' },
+    { key: 'text', label: '文字色' },
+    { key: 'accent', label: '强调色' },
+    { key: 'accent2', label: '辅助色' },
+    { key: 'accent3', label: '点缀色' },
+    { key: 'success', label: '成功色' },
+    { key: 'warning', label: '警告色' },
+    { key: 'danger', label: '危险色' },
+    { key: 'border', label: '边框色' },
+  ];
+  document.getElementById('theme-colors').innerHTML = colorKeys.map(c =>
+    '<div class="theme-color-row">' +
+    '<label>' + c.label + '</label>' +
+    '<input type="color" value="' + currentTheme[c.key] + '" id="theme-c-' + c.key + '" onchange="onColorChange(\'' + c.key + '\')">' +
+    '<input type="text" value="' + currentTheme[c.key] + '" id="theme-t-' + c.key + '" onchange="onColorTextChange(\'' + c.key + '\')" placeholder="#000000">' +
+    '</div>'
+  ).join('');
+
+  document.getElementById('theme-bg-url').value = t.bgImage || '';
+}
+
+function closeThemePanel() {
+  document.getElementById('theme-modal').classList.remove('show');
+}
+
+function selectThemePreset(key) {
+  if (!DATA.theme) DATA.theme = {};
+  DATA.theme.preset = key;
+  DATA.theme.colors = {};
+  DATA.theme.bgImage = '';
+  const preset = themePresets[key];
+  applyTheme(preset);
+  persist();
+  openThemePanel(); // refresh panel
+  toast('已切换至「' + preset.name + '」主题 🎨');
+}
+
+function onColorChange(key) {
+  const colorInput = document.getElementById('theme-c-' + key);
+  const textInput = document.getElementById('theme-t-' + key);
+  if (textInput) textInput.value = colorInput.value;
+  previewColor(key, colorInput.value);
+}
+
+function onColorTextChange(key) {
+  const textInput = document.getElementById('theme-t-' + key);
+  const colorInput = document.getElementById('theme-c-' + key);
+  if (colorInput) colorInput.value = textInput.value;
+  previewColor(key, textInput.value);
+}
+
+function previewColor(key, value) {
+  document.documentElement.style.setProperty('--' + key, value);
+}
+
+function applyBgUrl() {
+  const url = document.getElementById('theme-bg-url').value.trim();
+  if (!DATA.theme) DATA.theme = {};
+  DATA.theme.bgImage = url;
+  loadTheme();
+}
+
+function saveTheme() {
+  if (!DATA.theme) DATA.theme = {};
+  const t = DATA.theme;
+  const colorKeys = ['bg','bgCard','bgNav','text','textSecondary','textMuted','accent','accent2','accent3','success','warning','danger','border'];
+  t.colors = {};
+  let hasCustom = false;
+  colorKeys.forEach(k => {
+    const el = document.getElementById('theme-t-' + k);
+    if (el) {
+      t.colors[k] = el.value;
+      if (el.value !== (themePresets[t.preset]||{})[k]) hasCustom = true;
+    }
+  });
+  t.bgImage = document.getElementById('theme-bg-url').value.trim();
+  if (!hasCustom && !t.bgImage) {
+    t.colors = {};
+  }
+  persist();
+  loadTheme();
+  closeThemePanel();
+  toast('主题已保存！🎨');
+}
+
+function resetTheme() {
+  DATA.theme = { preset: 'dark', colors: {}, bgImage: '' };
+  persist();
+  applyTheme(themePresets['dark']);
+  closeThemePanel();
+  toast('已恢复默认主题 🌙');
+}
+
+// ==================== 初始化 ====================
+loadTheme();
+updateDateTime();
+setInterval(updateDateTime, 60000);
+renderDashboard();
+</script>
+</body>
+</html>
