@@ -2011,6 +2011,11 @@ function onColorTextChange(key) {
   const v = textInput.value;
   document.getElementById('theme-swatch-' + key).style.background = v;
   previewColor(key, v);
+  // 自动保存
+  if (!DATA.theme) DATA.theme = {};
+  if (!DATA.theme.colors) DATA.theme.colors = {};
+  DATA.theme.colors[key] = v;
+  persist();
 }
 
 function previewColor(key, value) {
@@ -2134,6 +2139,11 @@ function applyColorPicker() {
   document.getElementById('theme-t-' + cpTarget).value = hex;
   document.getElementById('theme-swatch-' + cpTarget).style.background = hex;
   previewColor(cpTarget, hex);
+  // 立即保存到 DATA.theme
+  if (!DATA.theme) DATA.theme = {};
+  if (!DATA.theme.colors) DATA.theme.colors = {};
+  DATA.theme.colors[cpTarget] = hex;
+  persist();
   closeColorPicker();
 }
 
