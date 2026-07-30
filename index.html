@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title"content="卡西考研备战仓">
+<meta name="apple-mobile-web-app-title" content="卡西考研备战仓">
 <meta name="theme-color" content="#0f172a">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/kaoyan/manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><rect width=%22512%22 height=%22512%22 rx=%22100%22 fill=%22%230f172a%22/><text x=%22256%22 y=%22320%22 text-anchor=%22middle%22 font-size=%22240%22>📚</text></svg>">
 <title>卡西的考研备战仓</title>
 <script>
 if ('serviceWorker' in navigator) {
@@ -169,6 +170,23 @@ textarea { resize:vertical; min-height:80px; }
 .software-checklist .check-item:last-child { border-bottom:none; }
 .software-checklist .check-item input[type="checkbox"] { width:18px; height:18px; accent-color:var(--success); cursor:pointer; }
 .software-checklist .check-item.done { opacity:0.5; text-decoration:line-through; }
+/* 番茄钟 */
+.timer-container { text-align:center; }
+.timer-display { font-size:64px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:4px; margin:16px 0; background:linear-gradient(135deg, var(--accent), var(--accent3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.timer-subject { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:16px; }
+.timer-subject .sbj-btn { padding:8px 16px; border-radius:20px; border:1px solid var(--border); background:var(--bg); color:var(--text-secondary); cursor:pointer; font-size:13px; transition:all 0.2s; }
+.timer-subject .sbj-btn:hover { border-color:var(--accent); color:var(--text); }
+.timer-subject .sbj-btn.active { background:var(--accent); color:#0f172a; border-color:var(--accent); font-weight:600; }
+.timer-controls { display:flex; gap:10px; justify-content:center; margin-top:12px; }
+.timer-btn { width:48px; height:48px; border-radius:50%; border:none; font-size:20px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; }
+.timer-btn-start { background:var(--success); color:#0f172a; }
+.timer-btn-pause { background:var(--warning); color:#0f172a; }
+.timer-btn-stop { background:var(--danger); color:#fff; }
+.timer-btn-reset { background:var(--bg); color:var(--text-secondary); border:1px solid var(--border); }
+.timer-stats { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+.timer-stat-item { background:var(--bg); border-radius:var(--radius-sm); padding:10px 16px; text-align:center; min-width:70px; }
+.timer-stat-item .ts-val { font-size:18px; font-weight:700; color:var(--accent); }
+.timer-stat-item .ts-lbl { font-size:11px; color:var(--text-muted); }
 /* 响应式 */
 @media (max-width:768px) {
   nav { width:56px; min-width:56px; }
@@ -213,6 +231,18 @@ textarea { resize:vertical; min-height:80px; }
       <div class="countdown" id="dash-countdown">--</div>
       <div class="countdown-sub" id="dash-countdown-hours"></div>
       <div class="mt-md"><button class="btn btn-success" onclick="checkinToday()" id="dash-checkin-btn">✅ 今日打卡</button></div>
+    </div>
+    <div class="card timer-container">
+      <h2>⏱️ 专注计时器</h2>
+      <div class="timer-subject" id="timer-subjects"></div>
+      <div class="timer-display" id="timer-display">00:00:00</div>
+      <div class="timer-controls">
+        <button class="timer-btn timer-btn-start" id="timer-btn-start" onclick="timerStart()">▶</button>
+        <button class="timer-btn timer-btn-pause" id="timer-btn-pause" onclick="timerPause()" style="display:none;">⏸</button>
+        <button class="timer-btn timer-btn-stop" id="timer-btn-stop" onclick="timerStop()">⏹</button>
+        <button class="timer-btn timer-btn-reset" onclick="timerReset()">↺</button>
+      </div>
+      <div class="timer-stats" id="timer-stats"></div>
     </div>
     <div class="grid-2">
       <div class="card">
@@ -412,6 +442,7 @@ function getDefaultData() {
     review: { done: '', problem: '', tomorrow: '', hours: '' },
     checkins: {},
     studyHours: {},
+    timerLogs: {}, // {date: {subject: seconds}}
     // 教资
     teacher: {
       pianoLogs: {}, // {date: minutes}
@@ -650,6 +681,7 @@ function renderDashboard() {
       '<div class="phase-tasks">📋 ' + p.tasks + '</div>' +
       '</div>';
   }).join('');
+  renderTimerUI();
 }
 
 // 自动计算各科进度
@@ -689,6 +721,97 @@ function calcAutoProgress() {
     art336: artPct, art336Detail: artDetail,
     prof998: profPct, prof998Detail: profDetail,
   };
+}
+
+// ==================== 番茄钟计时器 ====================
+const timerSubjects = [
+  { key: 'politics', name: '政治', icon: '📖' },
+  { key: 'english', name: '英语', icon: '🇬🇧' },
+  { key: 'art336', name: '336艺术', icon: '🎨' },
+  { key: 'prof998', name: '998专业', icon: '🎬' },
+  { key: 'teacher', name: '教资', icon: '🎵' },
+];
+
+let timerState = {
+  running: false,
+  subject: 'politics',
+  seconds: 0,
+  intervalId: null,
+};
+
+function renderTimerUI() {
+  // 科目选择按钮
+  document.getElementById('timer-subjects').innerHTML = timerSubjects.map(s =>
+    '<button class="sbj-btn' + (timerState.subject === s.key ? ' active' : '') +
+    '" onclick="switchTimerSubject(\'' + s.key + '\')">' + s.icon + ' ' + s.name + '</button>'
+  ).join('');
+
+  // 时间显示
+  updateTimerDisplay();
+
+  // 今日各科统计
+  const today = getToday();
+  const todayLogs = DATA.timerLogs || {};
+  const todayData = todayLogs[today] || {};
+  document.getElementById('timer-stats').innerHTML = timerSubjects.map(s => {
+    const secs = todayData[s.key] || 0;
+    const mins = Math.floor(secs / 60);
+    return '<div class="timer-stat-item"><div class="ts-val">' + mins + '</div><div class="ts-lbl">' + s.name + '(分)</div></div>';
+  }).join('');
+}
+
+function updateTimerDisplay() {
+  const s = timerState.seconds;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  document.getElementById('timer-display').textContent =
+    String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+
+function switchTimerSubject(key) {
+  timerState.subject = key;
+  renderTimerUI();
+}
+
+function timerStart() {
+  if (timerState.running) return;
+  timerState.running = true;
+  document.getElementById('timer-btn-start').style.display = 'none';
+  document.getElementById('timer-btn-pause').style.display = 'inline-flex';
+  timerState.intervalId = setInterval(() => {
+    timerState.seconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function timerPause() {
+  if (!timerState.running) return;
+  timerState.running = false;
+  clearInterval(timerState.intervalId);
+  document.getElementById('timer-btn-start').style.display = 'inline-flex';
+  document.getElementById('timer-btn-pause').style.display = 'none';
+}
+
+function timerStop() {
+  if (timerState.seconds === 0) return;
+  timerPause();
+  // Save to data
+  const today = getToday();
+  if (!DATA.timerLogs) DATA.timerLogs = {};
+  if (!DATA.timerLogs[today]) DATA.timerLogs[today] = {};
+  DATA.timerLogs[today][timerState.subject] = (DATA.timerLogs[today][timerState.subject] || 0) + timerState.seconds;
+  timerState.seconds = 0;
+  updateTimerDisplay();
+  persist();
+  renderTimerUI();
+  toast('已记录 ' + timerSubjects.find(s => s.key === timerState.subject).name + ' 专注时间！⏱️');
+}
+
+function timerReset() {
+  timerPause();
+  timerState.seconds = 0;
+  updateTimerDisplay();
 }
 
 // ==================== 英语打卡 ====================
