@@ -482,11 +482,11 @@ function getDefaultData() {
       streak: 0, lastStudyDate: '',
       todayWordIndices: [], wordStatus: {},
       reviewQueue: [], translationIndex: 0,
-      wordDone: false,
+      wordDone: false, translationText: '',
     },
     pol: {
       quizIndices: [], wrongBook: [],
-      lastQuizDate: '', quizAnswered: false,
+      lastQuizDate: '', quizAnswered: false, quizAnswers: {},
     },
     art336: {
       bookPages: {0:0,1:0,2:0,3:0},
@@ -1082,9 +1082,10 @@ function renderEnglish() {
     DATA.eng.translationIndex = Math.floor(Math.random() * translationBank.length);
   }
   const t = translationBank[DATA.eng.translationIndex];
+  const savedTrans = DATA.eng.translationText || '';
   document.getElementById('eng-translation').innerHTML =
     '<div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;font-size:15px;line-height:1.7;border-left:3px solid var(--accent);">' + t.en + '</div>' +
-    '<textarea id="eng-trans-input" placeholder="请输入你的翻译..."></textarea>' +
+    '<textarea id="eng-trans-input" placeholder="请输入你的翻译..." oninput="saveTransText()">' + savedTrans + '</textarea>' +
     '<div class="mt-sm flex-row gap-sm">' +
     '<button class="btn btn-sm" onclick="showTranslation()">📖 查看参考译文</button>' +
     '<button class="btn btn-sm btn-ghost" onclick="nextTranslation()">🔄 换一题</button>' +
@@ -1140,6 +1141,11 @@ function showTranslation() {
   document.getElementById('eng-trans-selfrate').style.display = 'flex';
 }
 
+function saveTransText() {
+  DATA.eng.translationText = document.getElementById('eng-trans-input').value;
+  persist();
+}
+
 function rateTranslation(score) {
   const labels = ['❌ 全错', '🟠 部分正确', '✅ 全对'];
   const colors = ['var(--danger)', 'var(--warning)', 'var(--success)'];
@@ -1191,6 +1197,7 @@ function getDailyQuizIndices() {
   DATA.pol.quizIndices = indices;
   DATA.pol.lastQuizDate = today;
   DATA.pol.quizAnswered = false;
+  DATA.pol.quizAnswers = {}; // 新一天的题，清空旧答案
   persist();
   return indices;
 }
@@ -1205,16 +1212,29 @@ function renderPolitics() {
 
 function renderPoliticsQuiz() {
   const indices = getDailyQuizIndices();
-  polUserAnswers = {};
+  // 从 DATA 读取已保存的答案
+  if (!DATA.pol.quizAnswers) DATA.pol.quizAnswers = {};
+  polUserAnswers = DATA.pol.quizAnswers || {};
   let html = '';
   indices.forEach((qi, i) => {
     const q = politicsQuiz[qi];
+    const answered = polUserAnswers[i] !== undefined;
+    const userAns = polUserAnswers[i];
     html += '<div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">' +
       '<div class="quiz-question">第' + (i+1) + '题：' + q.q + '</div>';
     q.opts.forEach((opt, oi) => {
-      html += '<div class="quiz-option" data-q="' + i + '" data-o="' + oi + '" onclick="selectPolOption(this, ' + i + ', ' + oi + ', ' + qi + ')">' + opt + '</div>';
+      let cls = 'quiz-option';
+      if (answered && oi === q.ans) cls += ' correct';
+      if (answered && oi === userAns && oi !== q.ans) cls += ' wrong';
+      html += '<div class="' + cls + '" data-q="' + i + '" data-o="' + oi + '" onclick="selectPolOption(this, ' + i + ', ' + oi + ', ' + qi + ')">' + opt + '</div>';
     });
-    html += '<div class="quiz-explanation" id="pol-exp-' + i + '" style="display:none;"></div>';
+    if (answered) {
+      const correct = userAns === q.ans;
+      html += '<div class="quiz-explanation" style="display:block;">' +
+        (correct ? '<span class="tag tag-green">✅ 回答正确！</span><br>' : '<span class="tag tag-red">❌ 回答错误！正确答案是 ' + q.opts[q.ans].charAt(0) + '</span><br>') + q.exp + '</div>';
+    } else {
+      html += '<div class="quiz-explanation" id="pol-exp-' + i + '" style="display:none;"></div>';
+    }
     html += '</div>';
   });
   document.getElementById('pol-quiz').innerHTML = html;
@@ -1226,6 +1246,8 @@ function renderPoliticsQuiz() {
 function selectPolOption(el, qi, oi, quizIdx) {
   if (polUserAnswers[qi] !== undefined) return; // Already answered
   polUserAnswers[qi] = oi;
+  // 持久化答案
+  DATA.pol.quizAnswers = polUserAnswers;
   const q = politicsQuiz[quizIdx];
   const correct = oi === q.ans;
 
