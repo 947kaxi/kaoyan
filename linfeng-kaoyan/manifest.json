@@ -1,0 +1,20 @@
+{
+  "name": "林枫的考研预备间",
+  "short_name": "考研预备间",
+  "description": "2026南京师范大学音乐教育考研备考工作台",
+  "start_url": "/linfeng-kaoyan/",
+  "scope": "/linfeng-kaoyan/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><rect width=%22512%22 height=%22512%22 rx=%22100%22 fill=%22%230f172a%22/><text x=%22256%22 y=%22320%22 text-anchor=%22middle%22 font-size=%22240%22>🎵</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
