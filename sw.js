@@ -1,11 +1,42 @@
+var CACHE = 'kaoyan-v1';
+var URLS = [
+  '/kaoyan/',
+  '/kaoyan/index.html',
+  '/kaoyan/manifest.json'
+];
+
 self.addEventListener('install', function(e) {
-  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE).then(function(cache) {
+      return cache.addAll(URLS);
+    }).then(function() {
+      return self.skipWaiting();
+    })
+  );
 });
+
 self.addEventListener('activate', function(e) {
-  e.waitUntil(clients.claim());
+  e.waitUntil(
+    caches.keys().then(function(keys) {
+      return Promise.all(keys.filter(function(k) { return k !== CACHE; }).map(function(k) { return caches.delete(k); }));
+    }).then(function() {
+      return clients.claim();
+    })
+  );
 });
+
 self.addEventListener('fetch', function(e) {
-  e.respondWith(fetch(e.request).catch(function() {
-    return caches.match(e.request);
-  }));
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    caches.match(e.request).then(function(cached) {
+      var p = fetch(e.request).then(function(resp) {
+        if (resp && resp.status === 200) {
+          var clone = resp.clone();
+          caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
+        }
+        return resp;
+      });
+      return cached || p;
+    })
+  );
 });
