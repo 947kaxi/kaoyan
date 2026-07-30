@@ -172,7 +172,7 @@ textarea { resize:vertical; min-height:80px; }
 .software-checklist .check-item.done { opacity:0.5; text-decoration:line-through; }
 /* 番茄钟 */
 .timer-container { text-align:center; }
-.timer-display { font-size:64px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:4px; margin:16px 0; color:var(--accent); }
+.timer-display { font-size:64px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:4px; margin:16px 0; color:var(--timer-color, var(--accent)); }
 .timer-subject { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:16px; }
 .timer-subject .sbj-btn { padding:8px 16px; border-radius:20px; border:1px solid var(--border); background:var(--bg); color:var(--text-secondary); cursor:pointer; font-size:13px; transition:all 0.2s; }
 .timer-subject .sbj-btn:hover { border-color:var(--accent); color:var(--text); }
@@ -394,6 +394,11 @@ textarea { resize:vertical; min-height:80px; }
 
     <h4 style="font-size:14px;margin-bottom:10px;color:var(--text-secondary);">自定义颜色</h4>
     <div id="theme-colors"></div>
+    <div class="theme-color-row" style="margin-top:4px;">
+      <label>计时器色</label>
+      <input type="color" id="theme-c-timerColor" onchange="onTimerColorChange()">
+      <input type="text" id="theme-t-timerColor" onchange="onTimerColorTextChange()" placeholder="#38bdf8">
+    </div>
 
     <h4 style="font-size:14px;margin-bottom:10px;color:var(--text-secondary);">自定义背景</h4>
     <div class="flex-row gap-sm" style="margin-bottom:8px;">
@@ -1864,6 +1869,13 @@ function loadTheme() {
     }
   }
   if (t.bgImage) merged.bgImage = t.bgImage;
+  merged.bgOpacity = t.bgOpacity;
+  // 计时器颜色
+  if (t.colors && t.colors.timerColor) {
+    document.documentElement.style.setProperty('--timer-color', t.colors.timerColor);
+  } else {
+    document.documentElement.style.setProperty('--timer-color', merged.accent);
+  }
   applyTheme(merged);
 }
 
@@ -1903,6 +1915,11 @@ function openThemePanel() {
     '<input type="text" value="' + currentTheme[c.key] + '" id="theme-t-' + c.key + '" onchange="onColorTextChange(\'' + c.key + '\')" placeholder="#000000">' +
     '</div>'
   ).join('');
+
+  // 计时器颜色
+  const timerColor = (t.colors && t.colors.timerColor) || currentTheme.accent;
+  document.getElementById('theme-c-timerColor').value = timerColor;
+  document.getElementById('theme-t-timerColor').value = timerColor;
 
   // bgImage may be URL or base64; only show in URL field if it's a URL
   const bg = t.bgImage || '';
@@ -1949,6 +1966,18 @@ function onColorTextChange(key) {
 
 function previewColor(key, value) {
   document.documentElement.style.setProperty('--' + key, value);
+}
+
+// 计时器颜色
+function onTimerColorChange() {
+  const v = document.getElementById('theme-c-timerColor').value;
+  document.getElementById('theme-t-timerColor').value = v;
+  document.documentElement.style.setProperty('--timer-color', v);
+}
+function onTimerColorTextChange() {
+  const v = document.getElementById('theme-t-timerColor').value;
+  document.getElementById('theme-c-timerColor').value = v;
+  document.documentElement.style.setProperty('--timer-color', v);
 }
 
 function applyBgUrl() {
@@ -2013,6 +2042,9 @@ function saveTheme() {
   const urlInput = document.getElementById('theme-bg-url').value.trim();
   if (urlInput) t.bgImage = urlInput;
   t.bgOpacity = parseInt(document.getElementById('theme-bg-opacity').value) || 70;
+  // 计时器颜色
+  const tc = document.getElementById('theme-t-timerColor').value;
+  if (tc && tc !== (themePresets[t.preset]||{}).accent) { t.colors.timerColor = tc; hasCustom = true; }
   if (!hasCustom && !t.bgImage && t.bgOpacity === 70) {
     t.colors = {};
   }
