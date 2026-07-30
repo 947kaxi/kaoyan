@@ -759,8 +759,12 @@ function renderTimerUI() {
   const todayData = todayLogs[today] || {};
   document.getElementById('timer-stats').innerHTML = timerSubjects.map(s => {
     const secs = todayData[s.key] || 0;
-    const mins = Math.floor(secs / 60);
-    return '<div class="timer-stat-item"><div class="ts-val">' + mins + '</div><div class="ts-lbl">' + s.name + '(分)</div></div>';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const timeStr = h > 0 ? h + 'h' + m + 'm' : m + 'm';
+    return '<div class="timer-stat-item" onclick="openManualTime(\'' + s.key + '\')">' +
+      '<div class="ts-val">' + timeStr + '</div>' +
+      '<div class="ts-lbl">' + s.name + ' ✏️</div></div>';
   }).join('');
 }
 
@@ -816,6 +820,25 @@ function timerReset() {
   timerPause();
   timerState.seconds = 0;
   updateTimerDisplay();
+}
+
+// 手动补时：点击各科时间卡片弹出输入框
+function openManualTime(key) {
+  const today = getToday();
+  if (!DATA.timerLogs) DATA.timerLogs = {};
+  if (!DATA.timerLogs[today]) DATA.timerLogs[today] = {};
+  const currentSecs = DATA.timerLogs[today][key] || 0;
+  const currentH = Math.floor(currentSecs / 3600);
+  const currentM = Math.floor((currentSecs % 3600) / 60);
+  const name = timerSubjects.find(s => s.key === key).name;
+  const input = prompt('手动修改「' + name + '」今日累计时间\n当前：' + currentH + '小时' + currentM + '分钟\n\n请输入分钟数（如 90 表示1小时30分钟）：', currentM + currentH * 60);
+  if (input === null) return;
+  const mins = parseInt(input);
+  if (isNaN(mins) || mins < 0) { toast('请输入有效的分钟数'); return; }
+  DATA.timerLogs[today][key] = mins * 60;
+  persist();
+  renderTimerUI();
+  toast(name + ' 时间已更新为 ' + Math.floor(mins/60) + 'h' + (mins%60) + 'm ⏱️');
 }
 
 // ==================== 英语打卡 ====================
