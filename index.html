@@ -396,11 +396,15 @@ textarea { resize:vertical; min-height:80px; }
     <div id="theme-colors"></div>
 
     <h4 style="font-size:14px;margin-bottom:10px;color:var(--text-secondary);">自定义背景</h4>
+    <div class="flex-row gap-sm" style="margin-bottom:8px;">
+      <input type="file" id="theme-bg-file" accept="image/*" onchange="onBgFilePicked()" style="flex:1;padding:8px;">
+      <button class="btn btn-sm" onclick="clearBgImage()">🗑️ 清除</button>
+    </div>
     <div class="flex-row gap-sm">
-      <input type="text" id="theme-bg-url" placeholder="输入背景图片URL（留空则使用纯色背景）" style="flex:1;">
+      <input type="text" id="theme-bg-url" placeholder="或输入背景图片URL" style="flex:1;">
       <button class="btn btn-sm" onclick="applyBgUrl()">应用</button>
     </div>
-    <div class="text-sm text-muted mt-sm">支持任何图片直链，推荐使用暗色系壁纸</div>
+    <div class="text-sm text-muted mt-sm">从手机相册选择图片，或输入网络图片链接</div>
 
     <div class="mt-md flex-row gap-sm">
       <button class="btn btn-sm btn-success" onclick="saveTheme()">💾 保存主题</button>
@@ -1837,7 +1841,13 @@ function openThemePanel() {
     '</div>'
   ).join('');
 
-  document.getElementById('theme-bg-url').value = t.bgImage || '';
+  // bgImage may be URL or base64; only show in URL field if it's a URL
+  const bg = t.bgImage || '';
+  if (bg.startsWith('http')) {
+    document.getElementById('theme-bg-url').value = bg;
+  } else {
+    document.getElementById('theme-bg-url').value = bg ? '(本地图片)' : '';
+  }
 }
 
 function closeThemePanel() {
@@ -1878,7 +1888,34 @@ function applyBgUrl() {
   const url = document.getElementById('theme-bg-url').value.trim();
   if (!DATA.theme) DATA.theme = {};
   DATA.theme.bgImage = url;
+  // Clear file input
+  document.getElementById('theme-bg-file').value = '';
   loadTheme();
+}
+
+function onBgFilePicked() {
+  const file = document.getElementById('theme-bg-file').files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    if (!DATA.theme) DATA.theme = {};
+    DATA.theme.bgImage = base64;
+    document.getElementById('theme-bg-url').value = '';
+    loadTheme();
+    persist();
+    toast('背景已更新！🖼️');
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearBgImage() {
+  if (!DATA.theme) DATA.theme = {};
+  DATA.theme.bgImage = '';
+  document.getElementById('theme-bg-url').value = '';
+  document.getElementById('theme-bg-file').value = '';
+  loadTheme();
+  toast('背景已清除');
 }
 
 function saveTheme() {
@@ -1894,7 +1931,9 @@ function saveTheme() {
       if (el.value !== (themePresets[t.preset]||{})[k]) hasCustom = true;
     }
   });
-  t.bgImage = document.getElementById('theme-bg-url').value.trim();
+  // bgImage already set by onBgFilePicked or applyBgUrl, keep it
+  const urlInput = document.getElementById('theme-bg-url').value.trim();
+  if (urlInput) t.bgImage = urlInput;
   if (!hasCustom && !t.bgImage) {
     t.colors = {};
   }
