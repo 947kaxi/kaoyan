@@ -404,6 +404,11 @@ textarea { resize:vertical; min-height:80px; }
       <input type="text" id="theme-bg-url" placeholder="或输入背景图片URL" style="flex:1;">
       <button class="btn btn-sm" onclick="applyBgUrl()">应用</button>
     </div>
+    <div class="flex-row gap-sm mt-sm">
+      <span class="text-sm text-muted" style="width:60px;">透明度</span>
+      <input type="range" id="theme-bg-opacity" min="10" max="100" value="70" oninput="onBgOpacityChange()" style="flex:1;">
+      <span class="text-sm" id="theme-bg-opacity-val">70%</span>
+    </div>
     <div class="text-sm text-muted mt-sm">从手机相册选择图片，或输入网络图片链接</div>
 
     <div class="mt-md flex-row gap-sm">
@@ -761,9 +766,13 @@ function renderTimerUI() {
     const secs = todayData[s.key] || 0;
     const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
-    const timeStr = h > 0 ? h + 'h' + m + 'm' : m + 'm';
+    const sec = secs % 60;
+    let timeStr;
+    if (h > 0) timeStr = h + 'h ' + String(m).padStart(2,'0') + 'm ' + String(sec).padStart(2,'0') + 's';
+    else if (m > 0) timeStr = m + 'm ' + String(sec).padStart(2,'0') + 's';
+    else timeStr = sec + 's';
     return '<div class="timer-stat-item" onclick="openManualTime(\'' + s.key + '\')">' +
-      '<div class="ts-val">' + timeStr + '</div>' +
+      '<div class="ts-val" style="font-size:14px;">' + timeStr + '</div>' +
       '<div class="ts-lbl">' + s.name + ' ✏️</div></div>';
   }).join('');
 }
@@ -1030,7 +1039,13 @@ function renderEnglish() {
     '<button class="btn btn-sm" onclick="showTranslation()">📖 查看参考译文</button>' +
     '<button class="btn btn-sm btn-ghost" onclick="nextTranslation()">🔄 换一题</button>' +
     '</div>' +
-    '<div id="eng-trans-answer" style="display:none;margin-top:12px;padding:14px;background:rgba(74,222,128,0.08);border-radius:var(--radius-sm);border-left:3px solid var(--success);font-size:14px;line-height:1.7;"></div>';
+    '<div id="eng-trans-answer" style="display:none;margin-top:12px;padding:14px;background:rgba(74,222,128,0.08);border-radius:var(--radius-sm);border-left:3px solid var(--success);font-size:14px;line-height:1.7;"></div>' +
+    '<div id="eng-trans-selfrate" style="display:none;margin-top:8px;" class="flex-row gap-sm">' +
+    '<span class="text-sm text-muted">自评：</span>' +
+    '<button class="btn btn-xs btn-danger" onclick="rateTranslation(0)">❌ 全错</button>' +
+    '<button class="btn btn-xs btn-warning" onclick="rateTranslation(1)">🟠 部分对</button>' +
+    '<button class="btn btn-xs btn-success" onclick="rateTranslation(2)">✅ 全对</button>' +
+    '<span id="eng-trans-rating" class="text-sm"></span></div>';
 }
 
 function markWord(idx, status) {
@@ -1072,6 +1087,14 @@ function showTranslation() {
   const ans = document.getElementById('eng-trans-answer');
   ans.style.display = 'block';
   ans.innerHTML = '<strong>参考译文：</strong><br>' + t.zh;
+  document.getElementById('eng-trans-selfrate').style.display = 'flex';
+}
+
+function rateTranslation(score) {
+  const labels = ['❌ 全错', '🟠 部分正确', '✅ 全对'];
+  const colors = ['var(--danger)', 'var(--warning)', 'var(--success)'];
+  document.getElementById('eng-trans-rating').innerHTML = '<span style="color:' + colors[score] + ';font-weight:600;">' + labels[score] + '</span>';
+  toast('已自评：' + labels[score]);
 }
 
 function nextTranslation() {
@@ -1596,6 +1619,12 @@ function renderTeacher() {
       '<div class="question">第' + (i+1) + '题：' + item.q + '</div>' +
       '<button class="btn btn-sm btn-outline mb-sm" onclick="showStructAnswer(' + i + ')">💡 显示参考答案</button>' +
       '<div class="answer" id="struct-answer-' + i + '">' + item.a + '</div>' +
+      '<div id="struct-selfrate-' + i + '" style="display:none;margin-top:8px;" class="flex-row gap-sm">' +
+      '<span class="text-sm text-muted">自评：</span>' +
+      '<button class="btn btn-xs btn-danger" onclick="rateStruct(' + i + ',0)">❌ 全错</button>' +
+      '<button class="btn btn-xs btn-warning" onclick="rateStruct(' + i + ',1)">🟠 部分对</button>' +
+      '<button class="btn btn-xs btn-success" onclick="rateStruct(' + i + ',2)">✅ 全对</button>' +
+      '<span id="struct-rating-' + i + '" class="text-sm"></span></div>' +
       '</div>';
   }).join('') + '<div class="mt-sm"><button class="btn btn-sm btn-ghost" onclick="refreshStruct()">🔄 换一组题</button></div>';
 }
@@ -1627,6 +1656,14 @@ function saveSpeechNote() {
 
 function showStructAnswer(i) {
   document.getElementById('struct-answer-' + i).classList.add('show');
+  document.getElementById('struct-selfrate-' + i).style.display = 'flex';
+}
+
+function rateStruct(i, score) {
+  const labels = ['❌ 全错', '🟠 部分正确', '✅ 全对'];
+  const colors = ['var(--danger)', 'var(--warning)', 'var(--success)'];
+  document.getElementById('struct-rating-' + i).innerHTML = '<span style="color:' + colors[score] + ';font-weight:600;">' + labels[score] + '</span>';
+  toast('已自评：' + labels[score]);
 }
 
 function refreshStruct() {
@@ -1801,9 +1838,12 @@ function applyTheme(themeData) {
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center';
     document.body.style.backgroundAttachment = 'fixed';
-    // 给卡片加半透明效果
-    root.style.setProperty('--bg-card', themeData.bgCard + 'dd');
-    root.style.setProperty('--bg-nav', themeData.bgNav + 'ee');
+    // 背景透明度
+    const bgOpacity = (themeData.bgOpacity !== undefined ? themeData.bgOpacity : 70) / 100;
+    const cardAlpha = Math.round(bgOpacity * 220).toString(16).padStart(2,'0');
+    const navAlpha = Math.round(bgOpacity * 240).toString(16).padStart(2,'0');
+    root.style.setProperty('--bg-card', themeData.bgCard + cardAlpha);
+    root.style.setProperty('--bg-nav', themeData.bgNav + navAlpha);
   } else {
     document.body.style.backgroundImage = '';
     document.body.style.backgroundSize = '';
@@ -1871,6 +1911,10 @@ function openThemePanel() {
   } else {
     document.getElementById('theme-bg-url').value = bg ? '(本地图片)' : '';
   }
+  // 透明度
+  const opacity = t.bgOpacity !== undefined ? t.bgOpacity : 70;
+  document.getElementById('theme-bg-opacity').value = opacity;
+  document.getElementById('theme-bg-opacity-val').textContent = opacity + '%';
 }
 
 function closeThemePanel() {
@@ -1935,10 +1979,21 @@ function onBgFilePicked() {
 function clearBgImage() {
   if (!DATA.theme) DATA.theme = {};
   DATA.theme.bgImage = '';
+  DATA.theme.bgOpacity = 70;
   document.getElementById('theme-bg-url').value = '';
   document.getElementById('theme-bg-file').value = '';
+  document.getElementById('theme-bg-opacity').value = 70;
+  document.getElementById('theme-bg-opacity-val').textContent = '70%';
   loadTheme();
   toast('背景已清除');
+}
+
+function onBgOpacityChange() {
+  const val = parseInt(document.getElementById('theme-bg-opacity').value);
+  document.getElementById('theme-bg-opacity-val').textContent = val + '%';
+  if (!DATA.theme) DATA.theme = {};
+  DATA.theme.bgOpacity = val;
+  loadTheme();
 }
 
 function saveTheme() {
@@ -1957,7 +2012,8 @@ function saveTheme() {
   // bgImage already set by onBgFilePicked or applyBgUrl, keep it
   const urlInput = document.getElementById('theme-bg-url').value.trim();
   if (urlInput) t.bgImage = urlInput;
-  if (!hasCustom && !t.bgImage) {
+  t.bgOpacity = parseInt(document.getElementById('theme-bg-opacity').value) || 70;
+  if (!hasCustom && !t.bgImage && t.bgOpacity === 70) {
     t.colors = {};
   }
   persist();
