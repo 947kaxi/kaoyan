@@ -90,7 +90,7 @@ textarea { resize:vertical; min-height:80px; }
 .w-full { width:100%; }
 /* 倒计时 */
 .countdown-area { text-align:center; padding:30px 20px; }
-.countdown { font-size:56px; font-weight:800; background:linear-gradient(135deg, var(--accent), var(--accent3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.countdown { font-size:56px; font-weight:800; color:var(--countdown-color, var(--accent)); }
 .countdown-sub { color:var(--text-secondary); font-size:14px; margin-top:6px; }
 /* 快捷链接 */
 .quick-links { display:flex; gap:12px; flex-wrap:wrap; }
@@ -398,6 +398,11 @@ textarea { resize:vertical; min-height:80px; }
       <label>计时器色</label>
       <input type="color" id="theme-c-timerColor" onchange="onTimerColorChange()">
       <input type="text" id="theme-t-timerColor" onchange="onTimerColorTextChange()" placeholder="#38bdf8">
+    </div>
+    <div class="theme-color-row">
+      <label>倒计时色</label>
+      <input type="color" id="theme-c-countdownColor" onchange="onCountdownColorChange()">
+      <input type="text" id="theme-t-countdownColor" onchange="onCountdownColorTextChange()" placeholder="#38bdf8">
     </div>
 
     <h4 style="font-size:14px;margin-bottom:10px;color:var(--text-secondary);">自定义背景</h4>
@@ -1876,6 +1881,12 @@ function loadTheme() {
   } else {
     document.documentElement.style.setProperty('--timer-color', merged.accent);
   }
+  // 倒计时颜色
+  if (t.colors && t.colors.countdownColor) {
+    document.documentElement.style.setProperty('--countdown-color', t.colors.countdownColor);
+  } else {
+    document.documentElement.style.setProperty('--countdown-color', merged.accent);
+  }
   applyTheme(merged);
 }
 
@@ -1920,6 +1931,10 @@ function openThemePanel() {
   const timerColor = (t.colors && t.colors.timerColor) || currentTheme.accent;
   document.getElementById('theme-c-timerColor').value = timerColor;
   document.getElementById('theme-t-timerColor').value = timerColor;
+  // 倒计时颜色
+  const cdColor = (t.colors && t.colors.countdownColor) || currentTheme.accent;
+  document.getElementById('theme-c-countdownColor').value = cdColor;
+  document.getElementById('theme-t-countdownColor').value = cdColor;
 
   // bgImage may be URL or base64; only show in URL field if it's a URL
   const bg = t.bgImage || '';
@@ -1978,6 +1993,17 @@ function onTimerColorTextChange() {
   const v = document.getElementById('theme-t-timerColor').value;
   document.getElementById('theme-c-timerColor').value = v;
   document.documentElement.style.setProperty('--timer-color', v);
+}
+// 倒计时颜色
+function onCountdownColorChange() {
+  const v = document.getElementById('theme-c-countdownColor').value;
+  document.getElementById('theme-t-countdownColor').value = v;
+  document.documentElement.style.setProperty('--countdown-color', v);
+}
+function onCountdownColorTextChange() {
+  const v = document.getElementById('theme-t-countdownColor').value;
+  document.getElementById('theme-c-countdownColor').value = v;
+  document.documentElement.style.setProperty('--countdown-color', v);
 }
 
 function applyBgUrl() {
@@ -2045,6 +2071,9 @@ function saveTheme() {
   // 计时器颜色
   const tc = document.getElementById('theme-t-timerColor').value;
   if (tc && tc !== (themePresets[t.preset]||{}).accent) { t.colors.timerColor = tc; hasCustom = true; }
+  // 倒计时颜色
+  const cc = document.getElementById('theme-t-countdownColor').value;
+  if (cc && cc !== (themePresets[t.preset]||{}).accent) { t.colors.countdownColor = cc; hasCustom = true; }
   if (!hasCustom && !t.bgImage && t.bgOpacity === 70) {
     t.colors = {};
   }
