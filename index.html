@@ -13,7 +13,12 @@
 <title>卡西的考研备战仓</title>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/kaoyan/sw.js').catch(function(){});
+  // 强制清理所有旧 SW，确保加载最新版本
+  navigator.serviceWorker.getRegistrations().then(function(regs) {
+    regs.forEach(function(r) { r.unregister(); });
+  }).then(function() {
+    navigator.serviceWorker.register('/kaoyan/sw.js').catch(function(){});
+  });
 }
 </script>
 <style>
