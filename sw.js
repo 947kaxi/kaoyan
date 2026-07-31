@@ -1,4 +1,4 @@
-var CACHE = 'kaoyan-v1';
+var CACHE = 'kaoyan-v2';
 var URLS = [
   '/kaoyan/',
   '/kaoyan/index.html',
