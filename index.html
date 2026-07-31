@@ -13,10 +13,7 @@
 <title>卡西的考研备战仓</title>
 <script>
 if ('serviceWorker' in navigator) {
-  // 彻底移除 Service Worker，避免缓存问题
-  navigator.serviceWorker.getRegistrations().then(function(regs) {
-    regs.forEach(function(r) { r.unregister(); });
-  });
+  navigator.serviceWorker.register('/kaoyan/sw.js').catch(function(){});
 }
 </script>
 <style>
@@ -304,12 +301,8 @@ textarea { resize:vertical; min-height:80px; }
 
   <!-- ========== 政治刷题 ========== -->
   <div class="page" id="page-politics">
-    <div class="card" id="pol-yesterday-card" style="display:none;border-color:var(--warning);background:rgba(251,191,36,0.06);">
-      <h2>⏪ 昨日错题回顾</h2>
-      <div id="pol-yesterday-wrong"></div>
-    </div>
     <div class="card" id="pol-quiz-card">
-      <div class="flex-between"><h2>📖 每日刷题（15题）</h2><a class="btn btn-sm btn-outline" onclick="switchPoliticsTab('wrong')">📋 错题本 <span class="badge" id="pol-wrong-count">0</span></a></div>
+      <div class="flex-between"><h2>📖 每日刷题</h2><a class="btn btn-sm btn-outline" onclick="switchPoliticsTab('wrong')">📋 错题本 <span class="badge" id="pol-wrong-count">0</span></a></div>
       <div id="pol-quiz"></div>
       <div id="pol-result"></div>
     </div>
@@ -352,11 +345,6 @@ textarea { resize:vertical; min-height:80px; }
     <div class="card">
       <h2>🎛️ 软件学习进度</h2>
       <div id="prof998-software"></div>
-    </div>
-    <div class="card">
-      <h2>🎯 真题抽背</h2>
-      <div class="flex-between mb-sm"><span class="text-sm text-muted" id="prof998-review-count">待复习: 0</span><button class="btn btn-xs btn-ghost" onclick="nextProf998Recite()">🔄 换一题</button></div>
-      <div id="prof998-recite"></div>
     </div>
     <div class="card">
       <h2>📝 今日学习记录</h2>
@@ -489,7 +477,6 @@ const EXAM_DATE = new Date('2026-12-19T08:30:00');
 
 function getDefaultData() {
   return {
-    activePage: 'dashboard',
     progress: { politics: 0, english: 0, art336: 0, prof998: 0 },
     eng: {
       streak: 0, lastStudyDate: '',
@@ -510,8 +497,7 @@ function getDefaultData() {
     },
     prof998: {
       bookPages: {0:0,1:0,2:0,3:0},
-      softwareLogs: {}, note: '',
-      reciteQueue: [], masteredReciteIndices: [], currentReciteIndex: -1,
+      softwareLogs: {}, note: '', // softwareLogs: {date: minutes}
     },
     review: { done: '', problem: '', tomorrow: '', hours: '' },
     checkins: {},
@@ -569,14 +555,11 @@ function toast(msg) {
 document.querySelectorAll('nav a[data-page]').forEach(a => {
   a.addEventListener('click', function(e) {
     e.preventDefault();
-    const page = this.dataset.page;
     document.querySelectorAll('nav a[data-page]').forEach(x => x.classList.remove('active'));
     this.classList.add('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    DATA.activePage = page;
-    persist();
-    renderPage(page);
+    document.getElementById('page-' + this.dataset.page).classList.add('active');
+    renderPage(this.dataset.page);
   });
 });
 
@@ -1209,31 +1192,6 @@ const politicsQuiz = [
   { q: '资本有机构成提高的前提是（  ）', opts: ['A. 社会劳动生产率提高', 'B. 个别资本增大', 'C. 剩余价值率提高', 'D. 工人工资提高'], ans: 1, exp: '资本有机构成提高以个别资本增大为前提。个别资本增大有两种形式：资本积聚和资本集中。' },
   { q: '中国人民抗日战争胜利的决定性因素是（  ）', opts: ['A. 中国共产党的中流砥柱作用', 'B. 以爱国主义为核心的民族精神', 'C. 全民族抗战', 'D. 世界反法西斯力量的援助'], ans: 2, exp: '全民族抗战是中国人民抗日战争胜利的决定性因素。抗日战争是中华民族全民族的抗战。' },
   { q: '新发展理念中，解决发展动力问题的是（  ）', opts: ['A. 创新', 'B. 协调', 'C. 绿色', 'D. 共享'], ans: 0, exp: '创新发展注重解决发展动力问题。创新是引领发展的第一动力。' },
-  { q: '马克思主义认识论的首要的基本观点是（  ）', opts: ['A. 群众观点', 'B. 阶级观点', 'C. 实践观点', 'D. 矛盾观点'], ans: 2, exp: '实践观点是马克思主义认识论的首要的基本观点。实践是认识的来源、动力、目的和检验标准。' },
-  { q: '矛盾的基本属性是（  ）', opts: ['A. 普遍性和特殊性', 'B. 同一性和斗争性', 'C. 绝对性和相对性', 'D. 客观性和主观性'], ans: 1, exp: '矛盾的同一性和斗争性是矛盾的基本属性。同一性指矛盾双方相互依存、相互贯通；斗争性指矛盾双方相互排斥、相互对立。' },
-  { q: '量变和质变的根本区别在于（  ）', opts: ['A. 变化的速度不同', 'B. 变化的程度不同', 'C. 变化是否超出度的范围', 'D. 变化的主体不同'], ans: 2, exp: '量变和质变的根本区别在于变化是否超出了度的范围。在度范围内的变化是量变，超出度的范围就发生质变。' },
-  { q: '绝对真理和相对真理的关系是（  ）', opts: ['A. 绝对对立的', 'B. 没有任何联系的', 'C. 辩证转化的', 'D. 相互包含、辩证统一的'], ans: 3, exp: '绝对真理和相对真理是相互包含、辩证统一的。任何真理都既是绝对的又是相对的。' },
-  { q: '生产力中最活跃的因素是（  ）', opts: ['A. 劳动资料', 'B. 劳动对象', 'C. 劳动者', 'D. 科学技术'], ans: 2, exp: '劳动者是生产力中最活跃的因素。生产力包括劳动者、劳动资料和劳动对象，其中劳动者起主导作用。' },
-  { q: '生产关系的核心是（  ）', opts: ['A. 生产资料所有制', 'B. 人们在生产中的地位', 'C. 产品分配方式', 'D. 人与自然的关系'], ans: 0, exp: '生产资料所有制是生产关系的核心，它决定着生产关系的其他方面。' },
-  { q: '商品的价值量是由（  ）决定的', opts: ['A. 个别劳动时间', 'B. 社会必要劳动时间', 'C. 剩余劳动时间', 'D. 必要劳动时间'], ans: 1, exp: '商品的价值量是由生产商品的社会必要劳动时间决定的，不是由个别劳动时间决定的。' },
-  { q: '价值规律的作用形式是（  ）', opts: ['A. 价格围绕价值上下波动', 'B. 价格等于价值', 'C. 价格低于价值', 'D. 价格高于价值'], ans: 0, exp: '价值规律的作用形式是价格围绕价值上下波动。价格受供求关系影响围绕价值上下波动。' },
-  { q: '不变资本和可变资本的划分依据是（  ）', opts: ['A. 价值周转方式不同', 'B. 在剩余价值生产中的作用不同', 'C. 存在形式不同', 'D. 价值转移方式不同'], ans: 1, exp: '根据资本在剩余价值生产中的不同作用，资本划分为不变资本和可变资本。' },
-  { q: '相对过剩人口产生的根本原因是（  ）', opts: ['A. 人口增长过快', 'B. 资本积累和资本有机构成提高', 'C. 经济危机', 'D. 失业增加'], ans: 1, exp: '相对过剩人口产生的根本原因是资本积累和资本有机构成的提高。' },
-  { q: '新民主主义革命的领导者是（  ）', opts: ['A. 农民阶级', 'B. 资产阶级', 'C. 工人阶级', 'D. 知识分子'], ans: 2, exp: '新民主主义革命的领导者是工人阶级。工人阶级通过其先锋队——中国共产党实现对革命的领导权。' },
-  { q: '新民主主义革命的中心问题是（  ）', opts: ['A. 无产阶级领导权', 'B. 农民问题', 'C. 武装斗争', 'D. 统一战线'], ans: 1, exp: '农民问题是新民主主义革命的中心问题。中国革命实质上是农民革命。' },
-  { q: '中国革命三大法宝是（  ）', opts: ['A. 统一战线、武装斗争、党的建设', 'B. 实事求是、群众路线、独立自主', 'C. 武装斗争、土地革命、根据地建设', 'D. 理论联系实际、密切联系群众、批评与自我批评'], ans: 0, exp: '统一战线、武装斗争、党的建设是中国共产党在中国革命中战胜敌人的三个法宝。' },
-  { q: '社会主义的本质是（  ）', opts: ['A. 公有制和按劳分配', 'B. 解放生产力，发展生产力，消灭剥削，消除两极分化，最终达到共同富裕', 'C. 计划经济', 'D. 人民当家作主'], ans: 1, exp: '邓小平指出，社会主义的本质是解放生产力，发展生产力，消灭剥削，消除两极分化，最终达到共同富裕。' },
-  { q: '党的思想路线的核心是（  ）', opts: ['A. 一切从实际出发', 'B. 理论联系实际', 'C. 实事求是', 'D. 在实践中检验真理和发展真理'], ans: 2, exp: '实事求是是党的思想路线的核心。' },
-  { q: '我国处理民族关系的基本原则是（  ）', opts: ['A. 民族团结、民族平等、各民族共同繁荣', 'B. 民族自决', 'C. 民族同化', 'D. 民族区域自治'], ans: 0, exp: '我国处理民族关系的基本原则是民族平等、民族团结和各民族共同繁荣。' },
-  { q: '构建人类命运共同体思想的核心理念是（  ）', opts: ['A. 零和博弈', 'B. 共商共建共享', 'C. 霸权主义', 'D. 结盟对抗'], ans: 1, exp: '构建人类命运共同体秉持共商共建共享的全球治理观。' },
-  { q: '生态文明建设的核心是（  ）', opts: ['A. 经济发展', 'B. 处理好人与自然的关系', 'C. 城市化', 'D. 工业化'], ans: 1, exp: '生态文明建设的核心是处理好人与自然的关系，实现人与自然和谐共生。' },
-  { q: '全面依法治国的总目标是（  ）', opts: ['A. 建设中国特色社会主义法治体系、建设社会主义法治国家', 'B. 完善法律体系', 'C. 加强执法', 'D. 推进司法改革'], ans: 0, exp: '全面依法治国的总目标是建设中国特色社会主义法治体系、建设社会主义法治国家。' },
-  { q: '新时代我国社会主要矛盾是（  ）', opts: ['A. 人民日益增长的物质文化需要同落后的社会生产之间的矛盾', 'B. 人民日益增长的美好生活需要和不平衡不充分的发展之间的矛盾', 'C. 生产力和生产关系的矛盾', 'D. 经济基础和上层建筑的矛盾'], ans: 1, exp: '新时代我国社会主要矛盾已经转化为人民日益增长的美好生活需要和不平衡不充分的发展之间的矛盾。' },
-  { q: '实践作为认识的动力，主要是因为（  ）', opts: ['A. 实践不断提出新课题', 'B. 实践提供认识工具', 'C. 实践锻炼思维能力', 'D. 以上都是'], ans: 3, exp: '实践是认识发展的动力：实践不断提出新课题、提供新经验、提供认识工具、锻炼和提高人的认识能力。' },
-  { q: '真理的绝对性是指（  ）', opts: ['A. 真理永恒不变', 'B. 真理在任何条件下都正确', 'C. 真理的客观性和无条件性', 'D. 真理适用于一切领域'], ans: 2, exp: '真理的绝对性是指真理的客观性和无条件性。任何真理都包含客观内容。' },
-  { q: '社会意识相对独立性的最突出表现是（  ）', opts: ['A. 社会意识与社会存在变化的不完全同步性', 'B. 社会意识发展具有历史继承性', 'C. 社会意识对社会存在具有反作用', 'D. 各种社会意识形式之间相互影响'], ans: 2, exp: '社会意识相对独立性的最突出表现是社会意识对社会存在具有反作用。' },
-  { q: '劳动二重性是指（  ）', opts: ['A. 简单劳动和复杂劳动', 'B. 私人劳动和社会劳动', 'C. 具体劳动和抽象劳动', 'D. 体力劳动和脑力劳动'], ans: 2, exp: '劳动二重性是指具体劳动和抽象劳动。具体劳动创造使用价值，抽象劳动形成价值。' },
-  { q: '货币的基本职能是（  ）', opts: ['A. 价值尺度和流通手段', 'B. 支付手段和贮藏手段', 'C. 世界货币', 'D. 信用手段'], ans: 0, exp: '货币的基本职能是价值尺度和流通手段。' },
 ];
 
 function getDailyQuizIndices() {
@@ -1241,17 +1199,11 @@ function getDailyQuizIndices() {
   if (DATA.pol.lastQuizDate === today && DATA.pol.quizIndices.length > 0) {
     return DATA.pol.quizIndices;
   }
-  // 排除昨日错题，避免重复出现在今日15题中
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  const yesterdayWrongIdx = (DATA.pol.wrongBook || [])
-    .filter(w => w.date === yesterday && !w.mastered)
-    .map(w => w.quizIdx);
-  const pool = [...Array(politicsQuiz.length).keys()].filter(i => !yesterdayWrongIdx.includes(i));
+  const pool = [...Array(politicsQuiz.length).keys()];
   const indices = [];
-  while (indices.length < 15 && pool.length > 0) {
+  while (indices.length < 5) {
     const r = Math.floor(Math.random() * pool.length);
-    indices.push(pool[r]);
-    pool.splice(r, 1);
+    if (!indices.includes(pool[r])) indices.push(pool[r]);
   }
   DATA.pol.quizIndices = indices;
   DATA.pol.lastQuizDate = today;
@@ -1264,53 +1216,9 @@ function getDailyQuizIndices() {
 let polUserAnswers = {};
 
 function renderPolitics() {
-  document.getElementById('pol-wrong-count').textContent = DATA.pol.wrongBook.filter(w => !w.mastered).length;
-  renderYesterdayWrong();
+  document.getElementById('pol-wrong-count').textContent = DATA.pol.wrongBook.length;
   renderPoliticsHotspot();
   renderPoliticsQuiz();
-}
-
-// 昨日错题回顾
-function renderYesterdayWrong() {
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  const yWrong = (DATA.pol.wrongBook || []).filter(w => w.date === yesterday && !w.mastered);
-  const card = document.getElementById('pol-yesterday-card');
-  const container = document.getElementById('pol-yesterday-wrong');
-  if (yWrong.length === 0) { card.style.display = 'none'; return; }
-  card.style.display = '';
-  container.innerHTML = '<div class="text-sm text-muted mb-sm">昨日答错但尚未掌握的题，先复习再开始今天的15题 👇</div>' + yWrong.map((w, i) => {
-    const q = politicsQuiz[w.quizIdx];
-    if (!q) return '';
-    return '<div class="recite-card">' +
-      '<div class="question">错题' + (i+1) + '：' + q.q + '</div>' +
-      '<div class="text-sm" style="color:var(--danger);margin-bottom:4px;">昨日错选：' + q.opts[w.userAnswer] + '</div>' +
-      '<div class="text-sm" style="color:var(--success);margin-bottom:8px;">正确答案：' + q.opts[w.correctAnswer] + '</div>' +
-      '<button class="btn btn-sm btn-outline mb-sm" onclick="toggleYesterdayExp(this)">💡 显示解析</button>' +
-      '<div class="answer" style="display:none;">' + q.exp + '</div>' +
-      '<div class="mt-sm"><button class="btn btn-xs btn-success" onclick="masterYesterdayWrong(' + i + ')">✅ 已掌握，移除</button></div>' +
-      '</div>';
-  }).join('');
-}
-
-function toggleYesterdayExp(btn) {
-  const ans = btn.nextElementSibling;
-  if (ans.style.display === 'none' || !ans.style.display) {
-    ans.style.display = 'block'; btn.textContent = '🙈 隐藏解析';
-  } else {
-    ans.style.display = 'none'; btn.textContent = '💡 显示解析';
-  }
-}
-
-function masterYesterdayWrong(idx) {
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  const yWrong = DATA.pol.wrongBook.filter(w => w.date === yesterday && !w.mastered);
-  if (yWrong[idx]) {
-    yWrong[idx].mastered = true;
-    persist();
-    toast('已标记掌握！👍');
-    renderYesterdayWrong();
-    document.getElementById('pol-wrong-count').textContent = DATA.pol.wrongBook.filter(w => !w.mastered).length;
-  }
 }
 
 function renderPoliticsQuiz() {
@@ -1442,57 +1350,27 @@ function masterWrong(idx) {
 }
 
 const hotspots = [
-  { kw: '新质生产力', desc: '习近平总书记提出的重大概念，强调以科技创新为核心驱动力的先进生产力形态。特点是创新，关键在质优，本质是先进生产力。',
-    ex: { q: '关于新质生产力，下列说法正确的是（  ）', opts: ['A. 新质生产力就是传统生产力的量变', 'B. 新质生产力以科技创新为核心', 'C. 新质生产力忽视绿色发展', 'D. 新质生产力仅适用于高科技产业'], ans: 1, exp: '新质生产力以科技创新为核心驱动力，摆脱传统经济增长方式，具有高科技、高效能、高质量特征。' } },
-  { kw: '高质量发展', desc: '全面建设社会主义现代化国家的首要任务，推动经济实现质的有效提升和量的合理增长。',
-    ex: { q: '高质量发展的核心要义是（  ）', opts: ['A. 追求GDP增速最大化', 'B. 从"有没有"转向"好不好"', 'C. 扩大出口规模', 'D. 加快城市化进程'], ans: 1, exp: '高质量发展是从"有没有"转向"好不好"，强调发展的质量和效益。' } },
-  { kw: '中国式现代化', desc: '中国共产党领导的社会主义现代化，具有人口规模巨大、全体人民共同富裕、物质文明和精神文明相协调等五大特征。',
-    ex: { q: '中国式现代化的本质特征是（  ）', opts: ['A. 工业化', 'B. 城镇化', 'C. 中国共产党领导的社会主义现代化', 'D. 信息化'], ans: 2, exp: '中国式现代化是中国共产党领导的社会主义现代化，既有各国现代化的共同特征，更有基于自己国情的中国特色。' } },
-  { kw: '文化自信', desc: '更基础、更广泛、更深厚的自信，是一个国家、一个民族发展中最基本、最深沉、最持久的力量。',
-    ex: { q: '文化自信的来源不包括（  ）', opts: ['A. 中华优秀传统文化', 'B. 革命文化', 'C. 社会主义先进文化', 'D. 西方文化优越论'], ans: 3, exp: '文化自信来源于中华优秀传统文化、革命文化和社会主义先进文化。' } },
-  { kw: '全过程人民民主', desc: '社会主义民主政治的本质属性，是最广泛、最真实、最管用的民主，涵盖选举、协商、决策、管理、监督各环节。',
-    ex: { q: '全过程人民民主的本质属性是（  ）', opts: ['A. 间接民主', 'B. 精英民主', 'C. 社会主义民主政治的本质属性', 'D. 资产阶级民主'], ans: 2, exp: '全过程人民民主是社会主义民主政治的本质属性，实现了过程民主和成果民主的统一。' } },
-  { kw: '一带一路', desc: '丝绸之路经济带和21世纪海上丝绸之路，推动构建人类命运共同体的重要实践平台，秉持共商共建共享原则。',
-    ex: { q: '"一带一路"建设遵循的原则是（  ）', opts: ['A. 共商共建共享', 'B. 互利共赢', 'C. 平等互利', 'D. 互助合作'], ans: 0, exp: '"一带一路"秉持共商共建共享原则，不是中国一家的独奏，而是沿线国家的合唱。' } },
-  { kw: '共同富裕', desc: '社会主义的本质要求，是中国式现代化的重要特征。不是同步富裕，也不是均等富裕，而是分阶段促进。',
-    ex: { q: '关于共同富裕，理解正确的是（  ）', opts: ['A. 共同富裕就是平均主义', 'B. 共同富裕是同步富裕', 'C. 共同富裕要分阶段促进', 'D. 共同富裕就是均贫富'], ans: 2, exp: '共同富裕不是平均主义，不是同步富裕，而是分阶段、分批次逐步实现。' } },
-  { kw: '总体国家安全观', desc: '以人民安全为宗旨，以政治安全为根本，以经济安全为基础，以军事、科技、文化、社会安全为保障。',
-    ex: { q: '总体国家安全观以什么为宗旨（  ）', opts: ['A. 政治安全', 'B. 经济安全', 'C. 人民安全', 'D. 军事安全'], ans: 2, exp: '总体国家安全观以人民安全为宗旨，以政治安全为根本。' } },
-  { kw: '双碳目标', desc: '2030年前实现碳达峰、2060年前实现碳中和，是推动绿色低碳转型的重大战略决策。',
-    ex: { q: '我国提出碳达峰的时间节点是（  ）', opts: ['A. 2025年前', 'B. 2030年前', 'C. 2035年前', 'D. 2050年前'], ans: 1, exp: '我国承诺2030年前实现碳达峰，2060年前实现碳中和。' } },
-  { kw: '数字中国', desc: '以数字化转型整体驱动生产方式、生活方式和治理方式变革，建设网络强国、数字中国。',
-    ex: { q: '建设数字中国的核心驱动力是（  ）', opts: ['A. 政府投资', 'B. 数字技术创新', 'C. 人口红利', 'D. 土地资源'], ans: 1, exp: '数字中国建设以数字技术创新为核心驱动力。' } },
-  { kw: '乡村振兴', desc: '全面推进乡村产业、人才、文化、生态、组织振兴，促进农业高质高效、乡村宜居宜业、农民富裕富足。',
-    ex: { q: '乡村振兴的总要求中，放在首位的是（  ）', opts: ['A. 乡风文明', 'B. 治理有效', 'C. 产业兴旺', 'D. 生活富裕'], ans: 2, exp: '乡村振兴的总要求中，产业兴旺放在首位。' } },
-  { kw: '大国外交', desc: '推动构建人类命运共同体，坚持和平发展道路，积极参与全球治理体系改革和建设。',
-    ex: { q: '中国外交政策的宗旨是（  ）', opts: ['A. 维护世界和平、促进共同发展', 'B. 争夺世界霸权', 'C. 输出中国模式', 'D. 结盟对抗'], ans: 0, exp: '中国外交政策的宗旨是维护世界和平、促进共同发展。' } },
-  { kw: '教育强国', desc: '坚持教育优先发展，加快建设教育强国、科技强国、人才强国，办好人民满意的教育。',
-    ex: { q: '建设教育强国的根本任务是（  ）', opts: ['A. 提高升学率', 'B. 培养德智体美劳全面发展的社会主义建设者和接班人', 'C. 扩大高校规模', 'D. 引进海外人才'], ans: 1, exp: '建设教育强国的根本任务是立德树人，培养德智体美劳全面发展的社会主义建设者和接班人。' } },
-  { kw: '供给侧结构性改革', desc: '以供给侧结构性改革为主线，推动经济发展质量变革、效率变革、动力变革。',
-    ex: { q: '供给侧结构性改革的主攻方向是（  ）', opts: ['A. 扩大需求', 'B. 提高供给质量', 'C. 增加投资', 'D. 刺激消费'], ans: 1, exp: '供给侧结构性改革的主攻方向是提高供给质量，减少无效和低端供给，扩大有效和中高端供给。' } },
-  { kw: '全面依法治国', desc: '坚持依法治国、依法执政、依法行政共同推进，法治国家、法治政府、法治社会一体建设。',
-    ex: { q: '全面依法治国的总目标是（  ）', opts: ['A. 完善法律条文', 'B. 建设中国特色社会主义法治体系、建设社会主义法治国家', 'C. 增加执法人员', 'D. 提高司法效率'], ans: 1, exp: '全面依法治国的总目标是建设中国特色社会主义法治体系、建设社会主义法治国家。' } },
-  { kw: '人类命运共同体', desc: '秉持共商共建共享的全球治理观，建设持久和平、普遍安全、共同繁荣、开放包容、清洁美丽的世界。',
-    ex: { q: '构建人类命运共同体的核心理念是（  ）', opts: ['A. 零和博弈', 'B. 共商共建共享', 'C. 单边主义', 'D. 结盟对抗'], ans: 1, exp: '构建人类命运共同体秉持共商共建共享的全球治理观，反对零和博弈和单边主义。' } },
-  { kw: '数字中国', desc: '以数字化转型整体驱动生产方式、生活方式和治理方式变革，建设网络强国、数字中国。',
-    ex: { q: '建设数字中国的核心驱动力是（  ）', opts: ['A. 政府投资', 'B. 数字技术创新', 'C. 人口红利', 'D. 土地资源'], ans: 1, exp: '数字中国建设以数字技术创新为核心驱动力，推动数字产业化和产业数字化。' } },
+  { kw: '新质生产力', desc: '习近平总书记提出的重大概念，强调以科技创新为核心驱动力的先进生产力形态。' },
+  { kw: '高质量发展', desc: '全面建设社会主义现代化国家的首要任务，推动经济实现质的有效提升和量的合理增长。' },
+  { kw: '中国式现代化', desc: '中国共产党领导的社会主义现代化，具有人口规模巨大、全体人民共同富裕等五大特征。' },
+  { kw: '文化自信', desc: '更基础、更广泛、更深厚的自信，是一个国家、一个民族发展中最基本、最深沉、最持久的力量。' },
+  { kw: '全过程人民民主', desc: '社会主义民主政治的本质属性，是最广泛、最真实、最管用的民主。' },
+  { kw: '一带一路', desc: '丝绸之路经济带和21世纪海上丝绸之路，推动构建人类命运共同体的重要实践平台。' },
+  { kw: '共同富裕', desc: '社会主义的本质要求，是中国式现代化的重要特征，鼓励勤劳创新致富。' },
+  { kw: '总体国家安全观', desc: '以人民安全为宗旨，以政治安全为根本，统筹外部安全和内部安全、国土安全和国民安全。' },
+  { kw: '双碳目标', desc: '2030年前实现碳达峰、2060年前实现碳中和，是推动绿色低碳转型的重大战略决策。' },
+  { kw: '数字中国', desc: '以数字化转型整体驱动生产方式、生活方式和治理方式变革，建设网络强国、数字中国。' },
+  { kw: '乡村振兴', desc: '全面推进乡村产业、人才、文化、生态、组织振兴，促进农业高质高效、乡村宜居宜业。' },
+  { kw: '大国外交', desc: '推动构建人类命运共同体，坚持和平发展道路，积极参与全球治理体系改革和建设。' },
+  { kw: '教育强国', desc: '坚持教育优先发展，加快建设教育强国、科技强国、人才强国，办好人民满意的教育。' },
+  { kw: '供给侧结构性改革', desc: '以供给侧结构性改革为主线，推动经济发展质量变革、效率变革、动力变革。' },
+  { kw: '全面依法治国', desc: '坚持依法治国、依法执政、依法行政共同推进，法治国家、法治政府、法治社会一体建设。' },
 ];
 
 function renderPoliticsHotspot() {
   const h = hotspots[Math.floor(Math.random() * hotspots.length)];
-  let html = '<span class="tag tag-red">热点</span> <strong>' + h.kw + '</strong>：' + h.desc;
-  if (h.ex) {
-    html += '<div class="mt-md" style="border-top:1px solid var(--border);padding-top:12px;">' +
-      '<span class="tag tag-yellow">📌 例题</span> <strong>' + h.ex.q + '</strong>' +
-      '<div class="mt-sm">' + h.ex.opts.map((opt, i) => {
-        let cls = 'quiz-option';
-        if (i === h.ex.ans) cls += ' correct';
-        return '<div class="' + cls + '" style="cursor:default;">' + opt + (i === h.ex.ans ? ' ✅' : '') + '</div>';
-      }).join('') + '</div>' +
-      '<div class="quiz-explanation" style="display:block;margin-top:8px;">' + h.ex.exp + '</div>' +
-      '</div>';
-  }
-  document.getElementById('pol-hotspot').innerHTML = html;
+  document.getElementById('pol-hotspot').innerHTML =
+    '<span class="tag tag-red">热点</span> <strong>' + h.kw + '</strong>：' + h.desc;
 }
 
 // ==================== 336艺术基础 ====================
@@ -1534,18 +1412,6 @@ const art336ReciteBank = [
   { q: '简答题：简述艺术与宗教的关系', a: '艺术与宗教在人类历史上有着密切的关系。一方面，宗教对艺术的发展产生了深远的影响：宗教为艺术提供了丰富的题材和内容；宗教活动为艺术创作提供了场所和需求；宗教情感激发了艺术家的创作灵感。另一方面，艺术也服务于宗教：艺术是宗教宣传和教化的重要手段；宗教建筑、雕塑、绘画、音乐等本身就是宗教艺术的杰作。随着社会的发展，艺术逐渐从宗教中独立出来，获得了自主发展的空间。' },
   { q: '名词解释：接受美学', a: '接受美学是20世纪60年代由德国美学家姚斯和伊瑟尔创立的文学理论流派。该理论将研究重心从作者和作品转向读者（接受者），强调读者在文学活动中的主动性和创造性作用。接受美学认为，文学作品的意义不是固定不变的，而是在读者的阅读过程中动态生成的；作品存在许多"空白"和"未定点"，需要读者用自己的想象和经验去填充。接受美学对理解艺术欣赏活动具有重要的启发意义。' },
   { q: '简答题：简述艺术教育的意义', a: '艺术教育是素质教育的重要组成部分，其意义体现在：1. 培养审美能力——提高人们对美的感受、鉴赏和创造能力；2. 陶冶道德情操——优秀的艺术作品能够净化人的心灵，提升道德修养；3. 开发智力潜能——艺术活动能够促进人的形象思维、创造力和想象力发展；4. 促进身心健康——艺术活动具有心理疏导和情感宣泄的功能；5. 传承文化传统——艺术教育是民族文化传承的重要途径。' },
-  // ===== 浙传336真题 =====
-  { q: '【真题·名词解释】戏曲', a: '戏曲是中国传统的戏剧形式，是包含文学、音乐、舞蹈、美术、杂技等多种因素的综合艺术。戏曲具有综合性、虚拟性、程式性三大美学特征。中国戏曲历史悠久，剧种繁多，主要有京剧、昆曲、越剧、豫剧、黄梅戏等。戏曲以歌舞演故事，通过唱念做打的表现手段塑造人物形象，是中国传统文化的重要载体和瑰宝。' },
-  { q: '【真题·名词解释】艺术风格', a: '艺术风格是指艺术家在创作中表现出来的独特的艺术特色和创作个性，是艺术家的创作个性在作品内容和形式上的整体体现。艺术风格具有独特性、稳定性和多样性等特征，是艺术家成熟的标志。风格的形成受艺术家个人因素（世界观、生活经历、艺术修养等）和社会因素（时代背景、民族传统等）的双重影响。如李白诗歌的豪放飘逸与杜甫诗歌的沉郁顿挫即为不同艺术风格的体现。' },
-  { q: '【真题·名词解释】艺术形象', a: '艺术形象是艺术家根据现实生活，经过艺术概括和创造，在艺术作品中呈现的具体可感、具有审美价值的感性形象。艺术形象是艺术反映社会生活的特殊方式，具有具体可感性、概括性、情感性和审美性等特征。艺术形象可以是视觉的（绘画、雕塑）、听觉的（音乐）、想象的（文学），是艺术作品的核心要素。' },
-  { q: '【真题·名词解释】意境', a: '意境是中国传统美学的重要范畴，指艺术作品中呈现的情景交融、虚实相生的审美境界。意境由"意"（艺术家的主观情感）和"境"（客观物象）构成，通过情景交融达到主观与客观、有限与无限的统一。意境的核心特征是"言有尽而意无穷"，追求象外之象、景外之景、韵外之致。意境理论在中国古典诗歌、山水画中体现尤为充分。' },
-  { q: '【真题·名词解释】模仿说', a: '模仿说是最古老的艺术起源学说，由古希腊哲学家德谟克利特和亚里士多德提出。该学说认为艺术起源于人类对自然和社会生活的模仿，模仿是人的本能和天性。亚里士多德在《诗学》中系统阐述了模仿说，认为艺术模仿的对象是"行动中的人"。模仿说的合理性在于肯定了艺术与现实的联系，但忽视了社会实践对艺术起源的决定作用。' },
-  { q: '【真题·名词解释】移情说', a: '移情说是19世纪末20世纪初由德国美学家立普斯提出的美学理论。该理论认为审美活动本质上是一种移情现象，即主体把自己的情感、意志投射到审美对象中去，使对象似乎也具有了人的情感。移情说的核心观点是"审美欣赏就是自我欣赏"，强调审美主体的能动作用。这一学说对理解艺术欣赏中的情感共鸣具有重要价值。' },
-  { q: '【真题·名词解释】陌生化', a: '陌生化是俄国形式主义文论家什克洛夫斯基提出的核心概念。指艺术通过特殊的表现手法，使习以为常的事物变得陌生和新奇，从而打破接受者的自动化感知，延长感知过程，恢复人们对生活的感受力。陌生化是文学艺术区别于日常语言的重要特征，如诗歌中打破常规语法的表达、电影中的非常规镜头角度等都属于陌生化手法的运用。' },
-  { q: '【真题·简答题】简述艺术批评的意义', a: '艺术批评的意义体现在三个方面：1. 对艺术家的影响——艺术批评通过对作品的阐释、解读和评判，将信息反馈给艺术家，影响并指导艺术家的创作方向；2. 对接受者的影响——艺术批评帮助受众理解和鉴赏艺术作品，提高审美判断力，引导艺术消费和艺术市场；3. 文化传播意义——艺术批评介入艺术交流和传播活动，具有重要的文化传播与文化建设意义，成为艺术传播和文化传播的有机环节。' },
-  { q: '【真题·简答题】简述情感在艺术创作和鉴赏中的作用', a: '情感在艺术创作和鉴赏中具有核心地位：在艺术创作中，情感是创作的内在驱动力，贯穿于艺术体验（激发创作冲动）、艺术构思（情感驱动想象和形象思维）和艺术传达（情感融入艺术语言）的全过程；在艺术鉴赏中，情感是审美体验的核心内容，从审美直觉阶段的情感初步触动，到审美体验阶段的情感深度共鸣，再到审美升华阶段的情感净化与超越。情感激发艺术创作，也深化艺术鉴赏。' },
-  { q: '【真题·论述题】分析"艺术是一种审美的意识形态"', a: '这一命题体现了马克思主义艺术本质观，可从三个层面分析：1. 社会本质——艺术是上层建筑中的意识形态，由经济基础决定，反映社会生活，论证了"艺术是一种意识形态"；2. 认识本质——艺术是对社会生活的能动反映，是一种精神生产，不同于科学和宗教等其他意识形态形式；3. 审美本质——艺术以独特的方式掌握世界，具有形象性、情感性、创造性等审美特征，论证了"这种意识形态是审美的"。三者统一于艺术实践，全面揭示了艺术的本质。' },
-  { q: '【真题·论述题】结合具体作品分析数字技术下艺术的嬗变', a: '数字技术深刻改变了当代艺术的面貌：1. 信息传播成为艺术本体的核心——数字媒体模糊了生活、科技与艺术的界限，跨媒介综合艺术不断涌现；2. 科学与艺术、技术与技巧深度融合——个人手工技艺逐渐弱化，观念的创新性、体验的新奇感加强；3. 艺术的社会性与公共性显著加强——互联网创造海量信息传播，交互性不断增强，数字复制消除了艺术圣殿的神秘感。如AI绘画、VR艺术、互动装置等均为数字技术下艺术嬗变的典型案例。本雅明《机械复制时代的艺术作品》中"光韵"消逝的理论在数字时代得到了更极致的体现。' },
 ];
 
 function renderArt336() {
@@ -1729,8 +1595,9 @@ function renderProf998() {
     '</div>';
 
   document.getElementById('prof998-note').value = DATA.prof998.note || '';
-  renderProf998Recite();
 }
+
+function updateProf998Page(idx) {
   const input = document.getElementById('prof998-pg-' + idx);
   const max = prof998Books[idx].pages;
   DATA.prof998.bookPages[idx] = Math.min(max, Math.max(0, parseInt(input.value) || 0));
@@ -1767,88 +1634,6 @@ function saveProf998Note() {
   DATA.prof998.note = document.getElementById('prof998-note').value;
   persist();
   toast('学习记录已保存！💾');
-}
-
-// ==================== 998真题抽背 ====================
-const prof998ReciteBank = [
-  { q: '【真题·名词解释】蒙太奇思维', a: '蒙太奇思维是电影艺术特有的思维方式，指导演在创作过程中以蒙太奇（镜头组接）的方式进行构思和表达。蒙太奇思维强调通过镜头的选择和组接来创造意义和情感，而非依赖单一镜头的独立表意。苏联导演爱森斯坦提出"蒙太奇就是冲突"的观点，认为两个镜头的组接能产生超越单个镜头之和的新意义。蒙太奇思维是电影区别于其他艺术形式的本质特征。' },
-  { q: '【真题·名词解释】类型电影', a: '类型电影是按照一定的模式和惯例生产的电影类别，具有相对稳定的叙事结构、人物类型、视觉风格和主题内容。常见类型包括西部片、歌舞片、恐怖片、科幻片、爱情片等。类型电影是电影工业化生产的产物，满足了观众的特定期待，也便于制片方控制成本与市场风险。类型电影既有相对固定的程式，又不断通过类型混合和创新实现发展。' },
-  { q: '【真题·名词解释】连续性剪辑', a: '连续性剪辑（又称无缝剪辑或好莱坞式剪辑）是经典好莱坞叙事电影中常用的一种剪辑方式，目的是使镜头之间的转换流畅自然，让观众察觉不到剪辑的存在，从而沉浸于故事之中。连续性剪辑遵循一系列规则，如180度轴线规则、视线匹配、动作连续性、30度规则等，以保持空间和时间的连贯性。' },
-  { q: '【真题·名词解释】场面调度', a: '场面调度原为戏剧术语，指导演对舞台上演员的位置和移动的安排。在电影中，场面调度指导演对镜头内所有视觉元素的控制，包括演员的走位和表演、摄影机的运动和角度、场景布置、灯光、色彩等。场面调度是导演实现其艺术构思的重要手段，反映了导演对画面空间的掌控能力和美学追求。安德烈·巴赞推崇的"长镜头"美学就是对场面调度的极致运用。' },
-  { q: '【真题·简答题】简述电视剧策划的流程要素', a: '电视剧策划的流程要素包括：1. 策划背景分析——了解市场需求、政策环境和播出平台定位；2. 题材选择与主题确立——确定电视剧的题材类型和核心主题；3. 人物形象设计——塑造具有鲜明性格和成长弧线的主要人物；4. 故事大纲与分集梗概——搭建基本叙事框架；5. 市场定位与营销策略——明确目标受众和差异化竞争优势；6. 制作与发行规划——统筹拍摄周期、预算和播出渠道。策划贯穿电视剧从创意到播出的全过程。' },
-  { q: '【真题·简答题】简述音乐在电影中的作用', a: '音乐在电影中的作用主要体现在：1. 营造氛围——音乐能塑造影片的整体情绪基调，如悬疑、浪漫或紧张；2. 表达情感——音乐能强化和深化画面传达的情感，帮助观众产生情感共鸣；3. 塑造人物——主题音乐（Leitmotif）能标识特定人物或主题，加强观众记忆；4. 推动叙事——音乐能暗示情节发展，连接场景转换；5. 控制节奏——音乐的快慢强弱影响观众感知的影片节奏；6. 补充画面——音乐能传达画面之外的信息，扩展画面的表现力。' },
-  { q: '【真题·简答题】简述轴线原则的基本内容', a: '轴线原则（180度规则）是电影拍摄和剪辑中保持空间连贯性的基本原则。轴线是连接两个被摄主体（或人物视线方向）的虚拟直线。基本内容：1. 摄影机应始终保持在轴线的同一侧（180度范围内）拍摄，以保证画面中人物的左右位置关系不变；2. 越轴（越过180度线拍摄）会导致画面空间关系混乱，使观众失去方向感；3. 合理的越轴可通过中性镜头、移动摄影机或插入空镜头等方式实现。轴线原则是连续性剪辑的基础规则。' },
-  { q: '【真题·简答题】简述电视节目与电视栏目的关系', a: '电视节目与电视栏目是包含与被包含的关系。电视节目是电视播出内容的基本单位，泛指一切在电视上播出的内容。电视栏目是具有固定名称、固定播出时间、固定风格和固定受众定位的节目集合，是电视节目的一种组织形式。区别在于：电视节目是单个的内容单元，而栏目是一个系列化的节目框架，如《新闻联播》是一个电视栏目，其中的每一条新闻则是一个电视节目。栏目化是电视节目生产走向规范化、品牌化的重要标志。' },
-  { q: '【真题·论述题】谈谈你对"纪录片也要讲故事"的理解', a: '"纪录片也要讲故事"强调纪录片不应只是客观记录，而应运用叙事手法增强表现力：1. 为什么——纪录片的艺术使命不仅是记录真实，更要打动观众，故事化叙事能增强纪录片的感染力和传播力；从艺术市场角度，有故事的纪录片更容易吸引观众；2. 怎么做——通过人物塑造（选择有故事性的拍摄对象）、结构安排（设置悬念和冲突）、镜头语言（运用特写、跟拍等手法）、剪辑节奏（控制信息释放的时机和速度）等方式来讲故事。但需注意，纪录片讲故事的前提是不违背真实性原则，以事实为基础进行叙事建构。' },
-  { q: '【真题·论述题】结合具体作品谈电视广告的特性', a: '电视广告的特性包括：1. 视听综合性——电视广告融合画面、声音、文字等多种元素，利用视听语言的综合表现力，如苹果"1984"广告利用强烈的视觉冲击和叙事悬念；2. 时间限制性——电视广告通常只有15-60秒，要求信息高度浓缩、创意高度凝练；3. 传播广泛性——电视覆盖面广，受众群体庞大，影响力强；4. 艺术性与商业性的统一——优秀的电视广告既有艺术感染力，又服务于商业目的；5. 重复性与创新性的统一——通过重复播放加深记忆，但需要不断更新创意避免审美疲劳。' },
-  { q: '【真题·名词解释】场面调度（补充）', a: '场面调度源自法语mise-en-scène，原意为"放入场景中"。在电影中，场面调度包括四个方面：1. 演员调度——演员在画面中的位置、移动和表演；2. 摄影机调度——摄影机的角度、距离和运动；3. 场景设计——布景、道具、色彩等视觉元素；4. 灯光设计——光线的方向、强度和质感。场面调度体现了导演对画面的全面控制，是电影视听语言的核心要素。' },
-  { q: '【真题·论述题】分析杭州亚运会开幕式的视听语言特色', a: '2023年杭州亚运会开幕式运用了丰富的视听语言：1. 数字技术赋能——大量运用AR、裸眼3D等数字技术，如"数字人"点火仪式，创造了虚实融合的视觉奇观；2. 中国文化元素的现代化表达——将江南水乡、良渚文化等传统元素通过现代视觉手段重新演绎；3. 色彩与灯光的戏剧化运用——以青绿色为主色调呼应"绿色亚运"理念，灯光设计与音乐节奏高度配合；4. 空间调度的创新——利用体育场空间进行立体化表演编排，打破传统开幕式舞台限制；5. 音乐与音效的沉浸式体验——融合中国传统音乐元素与现代电子音乐，营造出宏大而细腻的听觉感受。' },
-];
-
-function renderProf998Recite() {
-  const bank = prof998ReciteBank;
-  if (!DATA.prof998.reciteQueue) DATA.prof998.reciteQueue = [];
-  if (DATA.prof998.masteredReciteIndices === undefined) DATA.prof998.masteredReciteIndices = [];
-  if (DATA.prof998.currentReciteIndex === undefined) DATA.prof998.currentReciteIndex = -1;
-  document.getElementById('prof998-review-count').textContent = '待复习: ' + DATA.prof998.reciteQueue.length;
-
-  let idx = DATA.prof998.currentReciteIndex;
-  if (idx < 0 || idx >= bank.length) {
-    if (DATA.prof998.reciteQueue.length > 0) {
-      idx = DATA.prof998.reciteQueue[0];
-      DATA.prof998.reciteQueue.shift();
-    } else {
-      const pool = bank.map((_,i) => i).filter(i => !DATA.prof998.masteredReciteIndices.includes(i));
-      if (pool.length === 0) {
-        document.getElementById('prof998-recite').innerHTML = '<div class="text-center text-muted" style="padding:20px;">🎉 所有真题已掌握！</div>';
-        return;
-      }
-      idx = pool[Math.floor(Math.random() * pool.length)];
-    }
-    DATA.prof998.currentReciteIndex = idx;
-    persist();
-  }
-
-  const item = bank[idx];
-  document.getElementById('prof998-recite').innerHTML =
-    '<div class="recite-card">' +
-    '<div class="question">' + item.q + '</div>' +
-    '<div class="flex-row gap-sm mb-sm">' +
-    '<button class="btn btn-sm" onclick="showProf998Answer()">💡 显示答案</button>' +
-    '</div>' +
-    '<div class="answer" id="prof998-recite-answer">' + item.a + '</div>' +
-    '<div class="flex-row gap-sm mt-sm" id="prof998-recite-actions" style="display:none;">' +
-    '<button class="btn btn-sm btn-success" onclick="markProf998Mastered(' + idx + ')">✅ 已记住</button>' +
-    '<button class="btn btn-sm btn-warning" onclick="markProf998Review(' + idx + ')">📝 待复习</button>' +
-    '</div></div>';
-}
-
-function showProf998Answer() {
-  document.getElementById('prof998-recite-answer').classList.add('show');
-  document.getElementById('prof998-recite-actions').style.display = 'flex';
-}
-
-function markProf998Mastered(idx) {
-  if (!DATA.prof998.masteredReciteIndices.includes(idx)) DATA.prof998.masteredReciteIndices.push(idx);
-  DATA.prof998.reciteQueue = DATA.prof998.reciteQueue.filter(i => i !== idx);
-  DATA.prof998.currentReciteIndex = -1;
-  persist();
-  toast('已标记为记住！👍');
-  renderProf998();
-}
-
-function markProf998Review(idx) {
-  if (!DATA.prof998.reciteQueue.includes(idx)) DATA.prof998.reciteQueue.push(idx);
-  DATA.prof998.currentReciteIndex = -1;
-  persist();
-  toast('已加入明日复习队列 📝');
-  renderProf998();
-}
-
-function nextProf998Recite() {
-  DATA.prof998.currentReciteIndex = -1;
-  persist();
-  renderProf998();
 }
 
 // ==================== 教资面试 ====================
@@ -2527,21 +2312,7 @@ function resetTheme() {
 loadTheme();
 updateDateTime();
 setInterval(updateDateTime, 60000);
-// 恢复上次所在的页面
-(function initPage() {
-  const page = DATA.activePage || 'dashboard';
-  const navLink = document.querySelector('nav a[data-page="' + page + '"]');
-  if (navLink) {
-    document.querySelectorAll('nav a[data-page]').forEach(x => x.classList.remove('active'));
-    navLink.classList.add('active');
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const pageEl = document.getElementById('page-' + page);
-    if (pageEl) pageEl.classList.add('active');
-    renderPage(page);
-  } else {
-    renderDashboard();
-  }
-})();
+renderDashboard();
 </script>
 </body>
 </html>
