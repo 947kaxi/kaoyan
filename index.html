@@ -490,7 +490,7 @@ function getDefaultData() {
       lastTransDate: '', translationRating: null,
     },
     pol: {
-      quizIndices: [], wrongBook: [],
+      quizIndices: [], wrongBook: [], wrongReviewIndex: 0,
       lastQuizDate: '', quizAnswered: false, quizAnswers: {},
       shortAnswerIndex: -1, shortAnswerText: '', shortAnswerSubmitted: false,
     },
@@ -1205,6 +1205,17 @@ const politicsQuiz = [
   { q: '资本有机构成提高的前提是（  ）', opts: ['A. 社会劳动生产率提高', 'B. 个别资本增大', 'C. 剩余价值率提高', 'D. 工人工资提高'], ans: 1, exp: '资本有机构成提高以个别资本增大为前提。个别资本增大有两种形式：资本积聚和资本集中。' },
   { q: '中国人民抗日战争胜利的决定性因素是（  ）', opts: ['A. 中国共产党的中流砥柱作用', 'B. 以爱国主义为核心的民族精神', 'C. 全民族抗战', 'D. 世界反法西斯力量的援助'], ans: 2, exp: '全民族抗战是中国人民抗日战争胜利的决定性因素。抗日战争是中华民族全民族的抗战。' },
   { q: '新发展理念中，解决发展动力问题的是（  ）', opts: ['A. 创新', 'B. 协调', 'C. 绿色', 'D. 共享'], ans: 0, exp: '创新发展注重解决发展动力问题。创新是引领发展的第一动力。' },
+  // ===== 真题 =====
+  { q: '【2024真题】马克思把商品转换成货币称为"商品的惊险的跳跃"，这个跳跃如果不成功，摔坏的不是商品，但一定是商品占有者。这是因为（  ）', opts: ['A. 商品的使用价值无法被社会承认', 'B. 商品的价值无法在交换中实现', 'C. 商品生产的私人劳动无法转化为社会劳动', 'D. 只有商品变为货币，私人劳动才能转化为社会劳动'], ans: 3, exp: '私人劳动和社会劳动的矛盾是商品经济的基本矛盾。只有商品交换成功、私人劳动转化为社会劳动，商品生产者的劳动才被社会承认。' },
+  { q: '【2024真题】20世纪70年代以来，随着信息技术的发展，产生了"无人车间"等高度自动化的生产系统。对于剩余价值的来源，正确的理解是（  ）', opts: ['A. 机器人等自动化设备也创造剩余价值', 'B. 剩余价值不再来源于工人的劳动', 'C. 剩余价值仍然来源于工人的剩余劳动', 'D. 资本家管理劳动创造剩余价值'], ans: 2, exp: '自动化条件下，剩余价值的源泉仍然是雇佣工人的剩余劳动。自动化设备属于不变资本，不创造价值，只能转移价值。' },
+  { q: '【2024真题】习近平新时代中国特色社会主义思想的核心要义是（  ）', opts: ['A. 坚持和发展中国特色社会主义', 'B. 实现中华民族伟大复兴', 'C. 建设社会主义现代化强国', 'D. 全面深化改革'], ans: 0, exp: '坚持和发展中国特色社会主义，是习近平新时代中国特色社会主义思想的核心要义。' },
+  { q: '【2023真题】"两个结合"是指（  ）', opts: ['A. 把马克思主义基本原理同中国具体实际相结合、同中华优秀传统文化相结合', 'B. 理论和实践相结合、领导和群众相结合', 'C. 国内国际两个大局相结合、发展和安全相结合', 'D. 改革开放和四项基本原则相结合'], ans: 0, exp: '"两个结合"即把马克思主义基本原理同中国具体实际相结合、同中华优秀传统文化相结合，是习近平新时代中国特色社会主义思想的重大原创性贡献。' },
+  { q: '【2023真题】在资本主义生产过程中，工人的劳动作为具体劳动的作用是（  ）', opts: ['A. 创造剩余价值', 'B. 转移生产资料的价值', 'C. 创造劳动力价值', 'D. 创造新价值'], ans: 1, exp: '具体劳动转移生产资料的价值（旧价值），抽象劳动创造新价值（包括劳动力价值和剩余价值）。' },
+  { q: '【2023真题】物质决定意识，意识对物质具有反作用，这种反作用的突出表现是（  ）', opts: ['A. 意识能够正确地反映客观事物', 'B. 意识能够反作用于客观事物', 'C. 意识通过实践改造客观世界', 'D. 意识具有主观能动性'], ans: 2, exp: '意识对物质反作用的突出表现是意识通过指导实践来改造客观世界。实践是主观见之于客观的物质活动。' },
+  { q: '【2022真题】中国共产党区别于其他政党的显著标志是（  ）', opts: ['A. 理论联系实际', 'B. 密切联系群众', 'C. 批评与自我批评', 'D. 勇于自我革命'], ans: 3, exp: '勇于自我革命是中国共产党区别于其他政党的显著标志。党历经百年沧桑更加充满活力，其奥秘就在于始终坚持真理、修正错误，敢于正视问题、克服缺点，勇于刮骨疗毒、去腐生肌。' },
+  { q: '【2022真题】垄断利润主要是通过（  ）来实现的', opts: ['A. 垄断价格', 'B. 自由竞争', 'C. 技术创新', 'D. 政府补贴'], ans: 0, exp: '垄断利润主要是通过垄断组织制定的垄断价格来实现的。垄断价格包括垄断高价和垄断低价。' },
+  { q: '【2021真题】毛泽东思想达到成熟的标志是（  ）', opts: ['A. 农村包围城市道路理论的提出', 'B. 新民主主义革命理论的系统阐述', 'C. 社会主义改造理论的提出', 'D. 人民民主专政理论的提出'], ans: 1, exp: '新民主主义革命理论的系统阐述标志着毛泽东思想达到成熟。1939-1940年毛泽东发表《〈共产党人〉发刊词》《中国革命和中国共产党》《新民主主义论》等重要著作。' },
+  { q: '【2021真题】在人类社会发展中，起决定作用的因素是（  ）', opts: ['A. 地理环境', 'B. 人口因素', 'C. 生产方式', 'D. 政治制度'], ans: 2, exp: '物质资料的生产方式是人类社会存在和发展的基础，在社会发展中起决定作用。生产方式包括生产力和生产关系两个方面。' },
 ];
 
 // 政治简答题题库
@@ -1248,9 +1259,20 @@ function getDailyQuizIndices() {
 let polUserAnswers = {};
 
 function renderPolitics() {
-  document.getElementById('pol-wrong-count').textContent = DATA.pol.wrongBook.length;
+  const activeWrong = DATA.pol.wrongBook.filter(w => !w.mastered).length;
+  document.getElementById('pol-wrong-count').textContent = activeWrong;
+  
+  // 如果有未复习的错题，自动打开错题本
+  if (activeWrong > 0) {
+    document.getElementById('pol-quiz-card').style.display = 'none';
+    document.getElementById('pol-wrong-book').style.display = '';
+    renderWrongBook();
+  } else {
+    document.getElementById('pol-quiz-card').style.display = '';
+    document.getElementById('pol-wrong-book').style.display = 'none';
+    renderPoliticsQuiz();
+  }
   renderPoliticsHotspot();
-  renderPoliticsQuiz();
   renderShortAnswer();
 }
 
@@ -1421,33 +1443,91 @@ function switchPoliticsTab(tab) {
 
 function renderWrongBook() {
   const wb = DATA.pol.wrongBook;
-  if (wb.length === 0) {
-    document.getElementById('pol-wrong-list').innerHTML = '<div class="text-center text-muted" style="padding:20px;">暂无错题，继续保持！🎉</div>';
+  const active = wb.filter(w => !w.mastered);
+  if (active.length === 0) {
+    document.getElementById('pol-wrong-list').innerHTML = '<div class="text-center text-muted" style="padding:20px;">🎉 错题已全部消灭！</div>';
+    document.getElementById('pol-wrong-count').textContent = '0';
     return;
   }
-  let html = '';
-  wb.forEach((w, i) => {
-    const q = politicsQuiz[w.quizIdx];
-    if (!q) return;
-    html += '<div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:1px solid var(--border);' + (w.mastered ? 'opacity:0.5;' : '') + '">' +
-      '<div style="font-weight:600;margin-bottom:8px;">' + q.q + '</div>' +
-      '<div style="font-size:13px;color:var(--danger);">你的答案：' + q.opts[w.userAnswer] + '</div>' +
-      '<div style="font-size:13px;color:var(--success);">正确答案：' + q.opts[w.correctAnswer] + '</div>' +
-      '<div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">' + q.exp + '</div>' +
-      '<div class="mt-sm">' +
-      (w.mastered ? '<span class="tag tag-green">已掌握</span>' :
-       '<button class="btn btn-xs btn-success" onclick="masterWrong(' + i + ')">✅ 标记已掌握</button>') +
-      '</div></div>';
+  
+  // 每次显示一道错题
+  if (DATA.pol.wrongReviewIndex === undefined || DATA.pol.wrongReviewIndex >= active.length) {
+    DATA.pol.wrongReviewIndex = 0;
+  }
+  const idx = DATA.pol.wrongReviewIndex;
+  const w = active[idx];
+  const q = politicsQuiz[w.quizIdx];
+  if (!q) { DATA.pol.wrongReviewIndex++; renderWrongBook(); return; }
+  
+  const actualIdx = wb.indexOf(w);
+  
+  let html = '<div style="margin-bottom:8px;font-size:13px;color:var(--text-muted);">错题复习 ' + (idx+1) + '/' + active.length + '</div>';
+  html += '<div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border);">';
+  html += '<div style="font-weight:600;margin-bottom:14px;font-size:15px;">' + q.q + '</div>';
+  
+  // 选项按钮，像做题一样
+  html += '<div id="wrong-review-options">';
+  q.opts.forEach((opt, oi) => {
+    html += '<div class="quiz-option" onclick="answerWrongReview(' + actualIdx + ', ' + oi + ', this)" style="cursor:pointer;">' + opt + '</div>';
   });
+  html += '</div>';
+  
+  html += '<div id="wrong-review-result" style="margin-top:12px;"></div>';
+  html += '<div class="mt-sm" id="wrong-review-next" style="display:none;">';
+  html += '<button class="btn btn-sm" onclick="nextWrongReview()">下一题 ▶</button>';
+  html += '</div></div>';
+  
   document.getElementById('pol-wrong-list').innerHTML = html;
-  document.getElementById('pol-wrong-count').textContent = wb.filter(w => !w.mastered).length;
+  document.getElementById('pol-wrong-count').textContent = active.length;
 }
 
-function masterWrong(idx) {
-  DATA.pol.wrongBook[idx].mastered = true;
+function answerWrongReview(actualIdx, userAns, el) {
+  const w = DATA.pol.wrongBook[actualIdx];
+  const q = politicsQuiz[w.quizIdx];
+  const correct = userAns === q.ans;
+  
+  // 禁用所有选项
+  const container = el.parentElement;
+  container.querySelectorAll('.quiz-option').forEach((opt, i) => {
+    opt.style.pointerEvents = 'none';
+    if (i === q.ans) opt.classList.add('correct');
+    if (i === userAns && !correct) opt.classList.add('wrong');
+  });
+  el.classList.add('selected');
+  
+  const resultDiv = document.getElementById('wrong-review-result');
+  
+  if (correct) {
+    resultDiv.innerHTML = '<span class="tag tag-green">✅ 答对了！已从错题本移除</span>';
+    // 从错题本删除
+    DATA.pol.wrongBook.splice(actualIdx, 1);
+    // 调整 reviewIndex
+    if (DATA.pol.wrongReviewIndex >= DATA.pol.wrongBook.filter(w=>!w.mastered).length) {
+      DATA.pol.wrongReviewIndex = 0;
+    }
+  } else {
+    resultDiv.innerHTML = '<span class="tag tag-red">❌ 还是错了！正确答案是 ' + q.opts[q.ans].charAt(0) + '</span><br><span style="font-size:13px;color:var(--text-secondary);">' + q.exp + '</span>';
+    // 更新错题记录
+    w.userAnswer = userAns;
+    w.date = getToday();
+    DATA.pol.wrongReviewIndex++;
+  }
+  
+  persist();
+  document.getElementById('wrong-review-next').style.display = 'block';
+}
+
+function nextWrongReview() {
+  const active = DATA.pol.wrongBook.filter(w => !w.mastered);
+  if (active.length === 0) {
+    renderWrongBook();
+    return;
+  }
+  if (DATA.pol.wrongReviewIndex >= active.length) {
+    DATA.pol.wrongReviewIndex = 0;
+  }
   persist();
   renderWrongBook();
-  toast('已标记为掌握！👍');
 }
 
 const hotspots = [
