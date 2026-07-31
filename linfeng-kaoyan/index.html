@@ -483,6 +483,7 @@ function getDefaultData() {
       todayWordIndices: [], wordStatus: {},
       reviewQueue: [], translationIndex: 0,
       wordDone: false, translationText: '',
+      lastTransDate: '', translationRating: null,
     },
     pol: {
       quizIndices: [], wrongBook: [],
@@ -1077,10 +1078,13 @@ function renderEnglish() {
     document.getElementById('eng-words-status').innerHTML = '<span class="text-sm text-muted">剩余 ' + indices.filter(i => status[i] === undefined).length + ' 个单词待标记</span>';
   }
 
-  // Translation
-  if (DATA.eng.lastStudyDate !== getToday()) {
+  // Translation — 用独立的日期字段判断是否换题
+  if (DATA.eng.lastTransDate !== getToday()) {
     DATA.eng.translationIndex = Math.floor(Math.random() * translationBank.length);
+    DATA.eng.translationText = ''; // 新的一天，清除昨天的翻译
     DATA.eng.translationRating = null; // 新的一天，清除旧评分
+    DATA.eng.lastTransDate = getToday();
+    persist();
   }
   const t = translationBank[DATA.eng.translationIndex];
   const savedTrans = DATA.eng.translationText || '';
