@@ -355,6 +355,11 @@ textarea { resize:vertical; min-height:80px; }
       <textarea id="prof832-note" placeholder="记录今天的学习内容..."></textarea>
       <div class="mt-sm"><button class="btn btn-sm" onclick="saveProf832Note()">💾 保存记录</button></div>
     </div>
+    <div class="card" style="background:rgba(74,222,128,0.06);border-color:var(--success);">
+      <div class="flex-between"><h2>🎯 832真题抽背</h2><span class="text-sm text-muted" id="prof832-review-count"></span></div>
+      <div class="text-sm text-muted mb-sm">南师大832历年真题 · 补写旋律/音乐分析/论文写作</div>
+      <div id="prof832-recite"></div>
+    </div>
   </div>
 
   <!-- ========== 教资面试 ========== -->
@@ -481,6 +486,7 @@ const EXAM_DATE = new Date('2026-12-19T08:30:00');
 
 function getDefaultData() {
   return {
+    activePage: 'dashboard',
     progress: { politics: 0, english: 0, art628: 0, prof832: 0 },
     eng: {
       streak: 0, lastStudyDate: '',
@@ -502,6 +508,7 @@ function getDefaultData() {
     prof832: {
       bookPages: {0:0,1:0,2:0,3:0},
       practiceLogs: {}, note: '', // softwareLogs: {date: minutes}
+      reciteQueue: [], masteredReciteIndices: [], currentReciteIndex: -1,
     },
     review: { done: '', problem: '', tomorrow: '', hours: '' },
     checkins: {},
@@ -559,11 +566,14 @@ function toast(msg) {
 document.querySelectorAll('nav a[data-page]').forEach(a => {
   a.addEventListener('click', function(e) {
     e.preventDefault();
+    const page = this.dataset.page;
     document.querySelectorAll('nav a[data-page]').forEach(x => x.classList.remove('active'));
     this.classList.add('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + this.dataset.page).classList.add('active');
-    renderPage(this.dataset.page);
+    document.getElementById('page-' + page).classList.add('active');
+    DATA.activePage = page;
+    persist();
+    renderPage(page);
   });
 });
 
@@ -1520,6 +1530,29 @@ const art628ReciteBank = [
   { q: '简答题：简述艺术与宗教的关系', a: '艺术与宗教在人类历史上有着密切的关系。一方面，宗教对艺术的发展产生了深远的影响：宗教为艺术提供了丰富的题材和内容；宗教活动为艺术创作提供了场所和需求。另一方面，艺术也服务于宗教：艺术是宗教宣传和教化的重要手段。随着社会的发展，艺术逐渐从宗教中独立出来。' },
   { q: '名词解释：接受美学', a: '接受美学是20世纪60年代由德国美学家姚斯和伊瑟尔创立的文学理论流派。该理论将研究重心从作者和作品转向读者（接受者），强调读者在文学活动中的主动性和创造性作用。接受美学认为，文学作品的意义不是固定不变的，而是在读者的阅读过程中动态生成的。' },
   { q: '简答题：简述艺术教育的意义', a: '艺术教育是素质教育的重要组成部分，其意义体现在：1. 培养审美能力——提高人们对美的感受、鉴赏和创造能力；2. 陶冶道德情操——优秀的艺术作品能够净化人的心灵；3. 开发智力潜能——艺术活动能够促进形象思维、创造力和想象力发展；4. 促进身心健康——艺术活动具有心理疏导和情感宣泄的功能；5. 传承文化传统——艺术教育是民族文化传承的重要途径。' },
+  // ========== 628真题（南师大历年真题） ==========
+  { q: '【真题·选择】"五音"是指中国传统音乐中的五个基本音级，下列哪一项不属于"五音"？', a: '"五音"即宫、商、角、徵、羽，是中国传统音乐中的五声音阶。选项中的"变宫"和"变徵"属于"七音"（在五音基础上加入的偏音），不属于五音。五音对应的现代音名大致为：宫(do)、商(re)、角(mi)、徵(sol)、羽(la)。五声音阶是中国传统音乐最基本的音阶体系，广泛运用于民歌、戏曲、器乐等各类传统音乐形式中。' },
+  { q: '【真题·选择】下列关于京韵大鼓的表述，正确的是', a: '京韵大鼓是流行于北京、天津及华北地区的曲艺形式，由河北木板大鼓与子弟书合流发展而成，约形成于清代中叶。代表艺人有刘宝全、白云鹏、骆玉笙（小彩舞）等。京韵大鼓的唱腔高亢有力、刚柔相济，伴奏乐器主要为三弦和四胡，有时加琵琶。经典曲目有《丑末寅初》《剑阁闻铃》《大西厢》等。京韵大鼓在2008年被列入国家级非物质文化遗产名录。' },
+  { q: '【真题·选择】下列关于广东音乐的表述，错误的是', a: '广东音乐是流行于珠江三角洲及广州方言区的传统丝竹乐种，约形成于清末民初。广东音乐以高胡为主奏乐器（常以钢丝弦的高胡领奏），配以扬琴、秦琴、椰胡、洞箫等，音色清脆明亮、旋律流畅优美。代表曲目有《步步高》《旱天雷》《雨打芭蕉》《平湖秋月》等。广东音乐并非"全部来自民间小调改编"——它既有改编民间乐曲的作品，也有大量原创曲目，且深受粤剧音乐和西洋音乐的影响，具有鲜明的岭南地域特色和开放兼容的文化品格。' },
+  { q: '【真题·选择】西方管弦乐队中，属于"木管乐器组"的是', a: '西方管弦乐队通常分为四个乐器组：弦乐组（小提琴、中提琴、大提琴、低音提琴）、木管组（长笛、双簧管、单簧管、大管/巴松等）、铜管组（小号、圆号、长号、大号等）、打击乐组（定音鼓、三角铁、钹等）。木管乐器因早期多用木材制作而得名，其发音原理是通过吹气使管内空气柱振动。双簧管是木管组的定音乐器，管弦乐队调音时以双簧管的A音为准。长笛虽现代多为金属制造，但仍属于木管组。' },
+  { q: '【真题·选择】以下关于音乐社会功能的表述，正确的是', a: '音乐的社会功能是多方面的：1. 审美功能——音乐能够培养人们的审美能力，提升精神境界；2. 认识功能——音乐可以帮助人们认识社会、历史和人类情感；3. 教育功能——音乐具有陶冶情操、塑造人格的作用，中国古代就有"乐教"传统；4. 娱乐功能——音乐能使人获得精神愉悦和身心放松；5. 交流功能——音乐是超越语言的交流方式，可以沟通心灵、凝聚群体；6. 治疗功能——音乐治疗已成为现代医学的辅助手段。这些功能相互交织，共同构成音乐的社会价值。' },
+  { q: '【真题·简答】简述文人音乐的主要特征及其在中国传统音乐中的地位', a: '文人音乐是指由中国古代文人士大夫阶层创作和传承的音乐，以古琴音乐和词调音乐为代表。主要特征包括：（1）追求"清、微、淡、远"的审美意境，注重音乐的内在精神表达而非外在技巧炫耀；（2）强调"琴者，禁也"——将音乐与修身养性、道德教化相结合；（3）采用独特的记谱法（减字谱），重视演奏者的二度创作和即兴发挥空间；（4）音乐与诗歌、书法、绘画等文人艺术密切相关，形成综合性的文人艺术体系。在中国传统音乐中，文人音乐与宫廷音乐、民间音乐、宗教音乐并列为四大类别，代表了精英文化层的音乐审美理想，对中国音乐的审美取向产生了深远影响。古琴艺术于2003年被联合国教科文组织列入"人类口头和非物质遗产代表作"名录。' },
+  { q: '【真题·简答】试论浪漫主义音乐的主要特征及代表作曲家', a: '浪漫主义音乐是19世纪欧洲音乐的主流，主要特征包括：（1）强调主观情感的表达——音乐成为抒发个人内心世界的媒介，标题音乐盛行；（2）追求个性解放和自由——打破古典主义的形式束缚，在曲式、和声、配器等方面大胆创新；（3）与文学、诗歌、戏剧等其他艺术形式紧密结合——艺术歌曲（Lied）和交响诗等新体裁涌现；（4）民族意识的觉醒——各国作曲家注重运用本民族民间音乐素材，形成民族乐派；（5）追求宏大叙事和戏剧性对比——交响曲规模扩大，管弦乐队编制扩充。代表作曲家：早期有舒伯特（艺术歌曲之王）、韦伯（德国浪漫主义歌剧奠基人）；盛期有柏辽兹（标题交响乐开创者）、门德尔松、舒曼、肖邦（钢琴诗人）；中后期有李斯特（交响诗创立者）、瓦格纳（乐剧改革者）、勃拉姆斯（古典形式的守护者）；民族乐派有柴可夫斯基（俄国）、德沃夏克（捷克）、格里格（挪威）等。浪漫主义音乐以其丰富的情感表现力和个性创新精神，极大地拓展了音乐艺术的边界。' },
+  { q: '【真题·论述】试论艺术接受与艺术本质的关系', a: '艺术接受与艺术本质的关系是艺术理论中的根本性问题，可从以下几个方面展开论述：
+
+一、艺术接受是艺术本质实现的关键环节
+艺术活动的完整过程包括艺术创作、艺术作品和艺术接受三个环节。艺术作品只有在被接受者欣赏、理解和评价的过程中，其潜在的价值才能转化为现实的价值。正如接受美学所强调的，艺术作品的意义不是固定不变的，而是在接受过程中动态生成的。没有艺术接受，艺术的社会功能就无从实现。
+
+二、艺术接受体现了艺术的审美本质
+艺术的本质在于审美性。艺术接受的过程本质上是一种审美活动——接受者通过审美感知、审美体验和审美理解，与艺术作品产生情感共鸣和精神交流。这种审美接受活动充分体现了艺术区别于科学、道德等意识形态的独特本质。
+
+三、艺术接受对艺术创作的能动反作用
+艺术接受不是被动的消费，而是能动的创造。接受者的审美趣味、审美理想和文化素养，会通过市场反馈、批评等方式影响艺术家的创作取向。优秀的艺术作品能够培养和提升接受者的审美水平，而审美水平的提高又会对艺术创作提出更高要求，形成良性循环。
+
+四、艺术接受揭示了艺术的社会本质
+艺术作为上层建筑的一部分，其社会本质通过艺术接受得以体现。不同时代、不同阶级、不同文化背景的接受者对同一作品可能有不同的理解，这反映了艺术与社会生活的密切联系。同时，艺术接受的大众化或精英化倾向也折射出艺术与社会结构的关系。
+
+综上所述，艺术接受不是外在于艺术本质的附加环节，而是内在于艺术本质的规定性要素。离开了艺术接受，艺术既无法完成自身的价值实现，也无法充分彰显其审美本质和社会本质。' },
 ];
 
 function renderArt628() {
@@ -1700,6 +1733,9 @@ function renderProf832() {
     '</div>';
 
   document.getElementById('prof832-note').value = DATA.prof832.note || '';
+
+  // 真题抽背
+  renderProf832Recite();
 }
 
 function updateProf832Page(idx) {
@@ -1739,6 +1775,78 @@ function saveProf832Note() {
   DATA.prof832.note = document.getElementById('prof832-note').value;
   persist();
   toast('学习记录已保存！💾');
+}
+
+// ==================== 832真题抽背 ====================
+const prof832ReciteBank = [
+  { q: '【真题】补写旋律：《保卫黄河》片段（30分）', a: '《保卫黄河》是冼星海作曲、光未然作词的经典抗战歌曲，选自《黄河大合唱》。歌曲采用齐唱与轮唱形式，旋律激昂有力。核心旋律特征：以五声音阶为基础（宫调式），节奏铿锵有力，使用附点节奏和切分音增强战斗性。开头"风在吼，马在叫"采用级进上行旋律线，营造紧张氛围；"黄河在咆哮"以高音区强力推进，形成高潮。轮唱部分的运用增强了音乐的层次感和群众性。备考建议：熟悉旋律走向，掌握五线谱记谱，了解冼星海"中西融合"的创作理念。' },
+  { q: '【真题】《保卫黄河》的创作背景及社会影响', a: '创作背景：1938年诗人光未然随抗日演剧三队途经黄河，目睹山河破碎写下长诗《黄河吟》；1939年冼星海在延安仅用6天完成《黄河大合唱》创作，《保卫黄河》是核心乐章。社会影响：(1)即时影响——迅速在抗日根据地传唱，成为鼓舞军民抗战士气的核心曲目；(2)艺术影响——开创"民间音乐素材+现代合唱技法"的创作范式，轮唱形式增强感染力；(3)长远影响——超越抗战语境成为民族精神象征，多次在重大庆典中呈现。' },
+  { q: '【真题】音乐分析：柴可夫斯基《六月船歌》（40分）', a: '《六月船歌》是柴可夫斯基1875年创作钢琴套曲《四季》中的第六首。(1)调式调性：D大调为主调，中段转入b小调（关系小调），形成"明亮-深沉-明亮"的调性闭环。(2)曲式结构：单三部曲式A-B-A\'，A段呈示主题（琶音伴奏模拟船桨划水），B段对比（十六分音符群，情绪起伏），A\'段再现主题（加花装饰）。(3)创作手法：模进与重复发展旋律，左手固定琶音伴奏贯穿全曲，功能和声为基础加入减七和弦增强张力。(4)柴可夫斯基艺术成就：交响乐（第六"悲怆"交响曲）、歌剧（叶甫盖尼·奥涅金）、芭蕾（天鹅湖、胡桃夹子），以西方技法为骨架、民族情感为灵魂。' },
+  { q: '【真题】论文写作：选择专业方向作品进行音乐形式分析和内容解释（80分）', a: '832第三题为开放性论文写作题（80分），要求选择报考方向相关的音乐作品进行音乐形式分析和内容解释，并述其文化/情感/思想内涵。写作框架：(1)选作品——选择专业方向内的经典作品（如钢琴方向的贝多芬奏鸣曲、声乐方向的艺术歌曲等）；(2)形式分析——调式调性、曲式结构、旋律特征、和声手法、织体特点等；(3)内容解释——作品表达的情感内容和音乐意象；(4)外延分析——文化背景、时代意义、思想内涵。注意：不能选前两题出现的作品（保卫黄河、六月船歌）。答题要体现专业素养，既有技术分析深度，又有人文关怀。' },
+  { q: '【真题·模拟】音乐分析：贝多芬《月光奏鸣曲》第一乐章', a: '《月光奏鸣曲》（Op.27 No.2）第一乐章为近似单三部曲式，升c小调。(1)调式调性：升c小调贯穿，幽暗深沉，奠定悲剧性基调。(2)曲式结构：A段（1-8小节）呈示主题，三连音织体模拟月光下的静谧；中段（17-24小节）减七和弦增强张力；A\'段回归主题。(3)创作手法：左手三连音伴奏贯穿全曲，营造水波荡漾感；旋律线悠长连绵；和声上半音化进行增强表现力。(4)文化意义：创作于1801年贝多芬耳疾初发时期，打破古典奏鸣曲"快-慢-快"传统，以"慢-快-慢"结构开启浪漫主义先河。' },
+  { q: '【真题·模拟】补写旋律技巧总结', a: '832第一题补写旋律（30分）备考要点：(1)视唱练耳基础——能听旋律并转化为音符，建议每天进行旋律听写训练；(2)曲目积累——熟悉中国近现代经典歌曲（抗战歌曲、民歌改编曲等），特别是"又红又专"的作品；(3)记谱规范——掌握五线谱记谱法，注意调号、拍号、节奏型的准确书写；(4)常见考点——主旋律片段补写、节奏填空、调式判断；(5)备考材料——冼星海、聂耳、贺绿汀等作曲家的经典作品旋律。近年趋势：偏重中国近现代音乐作品。' },
+  { q: '【真题·模拟】论文写作：以"中国传统音乐在当代的传承与创新"为题', a: '写作思路：(1)引言——阐述中国传统音乐的价值与当代传承面临的挑战；(2)传统音乐的当代处境——全球化冲击、受众老龄化、传承方式单一等问题；(3)创新路径——与现代音乐元素融合（如"国风"音乐）、数字化传播（短视频、音乐平台）、教育体系改革、文旅融合等；(4)案例分析——可选谭盾的"有机音乐"、龚琳娜的新艺术音乐、自得琴社的古琴传播等；(5)结论——传承是根基，创新是出路，两者辩证统一。答题要体现对音乐教育专业的理解和对文化传承的思考。' },
+  { q: '【真题·模拟】论述：音乐教育在美育中的作用', a: '音乐教育是美育的核心组成部分。(1)培养审美感知——通过聆听和体验优秀音乐作品，提升对美的感受力和鉴赏力；(2)激发创造能力——音乐创作和即兴表演培养学生的想象力和创新思维；(3)塑造健全人格——音乐活动中的协作、坚持和情感表达，促进品格养成；(4)传承文化基因——通过学习民族音乐，增强文化认同感和民族自豪感；(5)促进全面发展——音乐与智力、情感、身体协调等多方面发展密切相关。在当代美育体系中，音乐教育应摆脱"技能培训"的单一模式，回归"以美育人"的本质。' },
+];
+function renderProf832Recite() {
+  const bank = prof832ReciteBank;
+  if (!DATA.prof832.reciteQueue) DATA.prof832.reciteQueue = [];
+  if (DATA.prof832.masteredReciteIndices === undefined) DATA.prof832.masteredReciteIndices = [];
+  if (DATA.prof832.currentReciteIndex === undefined) DATA.prof832.currentReciteIndex = -1;
+  document.getElementById('prof832-review-count').textContent = '待复习: ' + DATA.prof832.reciteQueue.length;
+
+  let idx = DATA.prof832.currentReciteIndex;
+  if (idx < 0 || idx >= bank.length) {
+    if (DATA.prof832.reciteQueue.length > 0) {
+      idx = DATA.prof832.reciteQueue[0];
+      DATA.prof832.reciteQueue.shift();
+    } else {
+      const pool = bank.map((_,i) => i).filter(i => !DATA.prof832.masteredReciteIndices.includes(i));
+      if (pool.length === 0) {
+        document.getElementById('prof832-recite').innerHTML = '<div class="text-center text-muted" style="padding:20px;">🎉 所有真题已掌握！</div>';
+        return;
+      }
+      idx = pool[Math.floor(Math.random() * pool.length)];
+    }
+    DATA.prof832.currentReciteIndex = idx;
+    persist();
+  }
+  const item = bank[idx];
+  document.getElementById('prof832-recite').innerHTML =
+    '<div class="recite-card">' +
+    '<div class="question">' + item.q + '</div>' +
+    '<div class="flex-row gap-sm mb-sm">' +
+    '<button class="btn btn-sm" onclick="showProf832Answer()">💡 显示答案</button>' +
+    '</div>' +
+    '<div class="answer" id="prof832-recite-answer">' + item.a + '</div>' +
+    '<div class="flex-row gap-sm mt-sm" id="prof832-recite-actions" style="display:none;">' +
+    '<button class="btn btn-sm btn-success" onclick="markProf832Mastered(' + idx + ')">✅ 已记住</button>' +
+    '<button class="btn btn-sm btn-warning" onclick="markProf832Review(' + idx + ')">📝 待复习</button>' +
+    '</div></div>';
+}
+function showProf832Answer() {
+  document.getElementById('prof832-recite-answer').classList.add('show');
+  document.getElementById('prof832-recite-actions').style.display = 'flex';
+}
+function markProf832Mastered(idx) {
+  if (!DATA.prof832.masteredReciteIndices.includes(idx)) DATA.prof832.masteredReciteIndices.push(idx);
+  DATA.prof832.reciteQueue = DATA.prof832.reciteQueue.filter(i => i !== idx);
+  DATA.prof832.currentReciteIndex = -1;
+  persist();
+  toast('已标记为记住！👍');
+  renderProf832();
+}
+function markProf832Review(idx) {
+  if (!DATA.prof832.reciteQueue.includes(idx)) DATA.prof832.reciteQueue.push(idx);
+  DATA.prof832.currentReciteIndex = -1;
+  persist();
+  toast('已加入复习队列 📝');
+  renderProf832();
+}
+function nextProf832Recite() {
+  DATA.prof832.currentReciteIndex = -1;
+  persist();
+  renderProf832();
 }
 
 // ==================== 教资面试 ====================
@@ -2417,7 +2525,21 @@ function resetTheme() {
 loadTheme();
 updateDateTime();
 setInterval(updateDateTime, 60000);
-renderDashboard();
+// 恢复上次所在的页面
+(function initPage() {
+  const page = DATA.activePage || 'dashboard';
+  const navLink = document.querySelector('nav a[data-page="' + page + '"]');
+  if (navLink) {
+    document.querySelectorAll('nav a[data-page]').forEach(x => x.classList.remove('active'));
+    navLink.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const pageEl = document.getElementById('page-' + page);
+    if (pageEl) pageEl.classList.add('active');
+    renderPage(page);
+  } else {
+    renderDashboard();
+  }
+})();
 </script>
 </body>
 </html>
