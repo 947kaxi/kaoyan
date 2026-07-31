@@ -302,9 +302,13 @@ textarea { resize:vertical; min-height:80px; }
   <!-- ========== 政治刷题 ========== -->
   <div class="page" id="page-politics">
     <div class="card" id="pol-quiz-card">
-      <div class="flex-between"><h2>📖 每日刷题</h2><a class="btn btn-sm btn-outline" onclick="switchPoliticsTab('wrong')">📋 错题本 <span class="badge" id="pol-wrong-count">0</span></a></div>
+      <div class="flex-between"><h2>📖 每日刷题（15道选择题）</h2><a class="btn btn-sm btn-outline" onclick="switchPoliticsTab('wrong')">📋 错题本 <span class="badge" id="pol-wrong-count">0</span></a></div>
       <div id="pol-quiz"></div>
       <div id="pol-result"></div>
+    </div>
+    <div class="card">
+      <h2>✍️ 每日简答</h2>
+      <div id="pol-shortanswer"></div>
     </div>
     <div class="card" id="pol-wrong-book" style="display:none;">
       <div class="flex-between"><h2>📋 错题本</h2><a class="btn btn-sm btn-ghost" onclick="switchPoliticsTab('quiz')">← 返回刷题</a></div>
@@ -488,6 +492,7 @@ function getDefaultData() {
     pol: {
       quizIndices: [], wrongBook: [],
       lastQuizDate: '', quizAnswered: false, quizAnswers: {},
+      shortAnswerIndex: -1, shortAnswerText: '', shortAnswerSubmitted: false,
     },
     art336: {
       bookPages: {0:0,1:0,2:0,3:0},
@@ -1194,6 +1199,25 @@ const politicsQuiz = [
   { q: '新发展理念中，解决发展动力问题的是（  ）', opts: ['A. 创新', 'B. 协调', 'C. 绿色', 'D. 共享'], ans: 0, exp: '创新发展注重解决发展动力问题。创新是引领发展的第一动力。' },
 ];
 
+// 政治简答题题库
+const polShortAnswerBank = [
+  { q: '简述实践是检验真理的唯一标准。', keywords: ['实践', '真理', '检验', '唯一标准', '主观', '客观', '改造', '物质'], ref: '实践是检验真理的唯一标准，这是由真理的本性和实践的特点决定的。真理是主观和客观相符合的范畴，检验真理就是检验主观认识是否与客观实际相符合。实践是主观见之于客观的物质活动，具有直接现实性的特点，能把主观和客观联系起来加以对照，从而判断认识是否具有真理性。' },
+  { q: '简述矛盾的普遍性和特殊性的辩证关系。', keywords: ['普遍性', '特殊性', '共性', '个性', '相互联结', '相互转化', '具体问题具体分析'], ref: '矛盾的普遍性是指矛盾存在于一切事物发展过程中，每一事物的发展过程中存在着自始至终的矛盾运动。矛盾的特殊性是指不同事物的矛盾各有其特点。二者是辩证统一的关系：普遍性寓于特殊性之中，并通过特殊性表现出来；特殊性包含着普遍性。二者在一定条件下可以相互转化。矛盾的普遍性和特殊性辩证关系原理是马克思主义普遍真理同各国具体实际相结合的哲学基础。' },
+  { q: '简述社会存在和社会意识的辩证关系。', keywords: ['社会存在', '社会意识', '决定', '反作用', '相对独立性', '经济基础', '上层建筑'], ref: '社会存在决定社会意识，社会意识是社会存在的反映。社会意识具有相对独立性，对社会存在具有能动的反作用——先进的社会意识促进社会发展，落后的社会意识阻碍社会发展。社会存在和社会意识是辩证统一的关系。' },
+  { q: '简述价值规律的作用。', keywords: ['价值规律', '资源配置', '技术进步', '优胜劣汰', '价格', '供求', '劳动生产率'], ref: '价值规律是商品经济的基本规律，其内容是：商品的价值量由生产商品的社会必要劳动时间决定，商品交换以价值量为基础实行等价交换。作用：①自发地调节生产资料和劳动力在社会各生产部门之间的分配比例；②自发地刺激社会生产力的发展；③自发地调节社会收入的分配，导致优胜劣汰。' },
+  { q: '简述毛泽东思想的活的灵魂。', keywords: ['实事求是', '群众路线', '独立自主', '毛泽东思想', '活的灵魂', '一切从实际出发'], ref: '毛泽东思想的活的灵魂包括三个基本方面：实事求是（一切从实际出发，理论联系实际，在实践中检验真理和发展真理）、群众路线（一切为了群众，一切依靠群众，从群众中来，到群众中去）、独立自主（坚持独立思考，走自己的路，把立足点放在依靠自己力量的基础上）。' },
+  { q: '简述社会主义本质的科学内涵。', keywords: ['解放生产力', '发展生产力', '消灭剥削', '消除两极分化', '共同富裕', '社会主义本质', '邓小平'], ref: '邓小平指出，社会主义的本质是解放生产力，发展生产力，消灭剥削，消除两极分化，最终达到共同富裕。这一概括包括两个方面：一是解放和发展生产力，这是社会主义的根本任务；二是消灭剥削、消除两极分化、实现共同富裕，这是社会主义的根本目标。' },
+  { q: '简述中国式现代化的基本特征。', keywords: ['人口规模巨大', '共同富裕', '物质文明', '精神文明', '人与自然和谐共生', '和平发展', '中国式现代化'], ref: '中国式现代化是人口规模巨大的现代化，是全体人民共同富裕的现代化，是物质文明和精神文明相协调的现代化，是人与自然和谐共生的现代化，是走和平发展道路的现代化。这五个特征既体现了现代化的共同特征，又具有鲜明的中国特色。' },
+  { q: '简述新发展格局的核心内涵。', keywords: ['新发展格局', '国内大循环', '国际国内双循环', '扩大内需', '供给侧改革', '高水平对外开放'], ref: '构建以国内大循环为主体、国内国际双循环相互促进的新发展格局，是把握未来发展主动权的战略性布局。核心是坚持扩大内需这个战略基点，使生产、分配、流通、消费更多依托国内市场，同时推动高水平对外开放，以国际循环提升国内循环的效率和水平。' },
+  { q: '简述质变和量变的辩证关系。', keywords: ['质变', '量变', '度', '飞跃', '积累', '相互转化', '质量互变'], ref: '量变是事物数量的增减和场所的变更，质变是事物根本性质的变化。量变是质变的必要准备，质变是量变的必然结果。质变为新的量变开辟道路，事物发展是量变和质变的统一。质量互变规律揭示了事物发展的形式和状态。' },
+  { q: '简述新民主主义革命的三大法宝。', keywords: ['统一战线', '武装斗争', '党的建设', '三大法宝', '新民主主义革命', '毛泽东'], ref: '毛泽东在《〈共产党人〉发刊词》中提出新民主主义革命的三大法宝：统一战线、武装斗争、党的建设。统一战线是战胜敌人的重要武器，武装斗争是中国革命的主要形式，党的建设是三大法宝的核心。三者相互联系、密不可分。' },
+  { q: '简述剩余价值的生产过程。', keywords: ['剩余价值', '必要劳动时间', '剩余劳动时间', '可变资本', '不变资本', '剥削', '资本主义'], ref: '剩余价值是雇佣工人创造的、被资本家无偿占有的超过劳动力价值的价值。在资本主义生产过程中，工人的劳动时间分为必要劳动时间（再生产劳动力价值）和剩余劳动时间（为资本家生产剩余价值）。剩余价值率=剩余价值/可变资本，反映了资本家对工人的剥削程度。' },
+  { q: '简述全面深化改革的总体目标。', keywords: ['全面深化改革', '国家治理体系', '治理能力现代化', '中国特色社会主义', '制度完善'], ref: '全面深化改革的总体目标是完善和发展中国特色社会主义制度，推进国家治理体系和治理能力现代化。前者规定了改革的根本方向，后者规定了改革的鲜明指向。全面深化改革必须坚持党的领导，坚持以人民为中心，坚持社会主义市场经济改革方向。' },
+  { q: '简述意识的能动作用。', keywords: ['意识', '能动作用', '目的性', '计划性', '创造性', '指导实践', '调控生理'], ref: '意识的能动作用主要表现在：①意识活动具有目的性和计划性；②意识活动具有创造性；③意识具有指导实践改造客观世界的作用；④意识具有调控人的行为和生理活动的作用。但意识能动作用的发挥受客观条件和客观规律的制约，必须以尊重客观规律为前提。' },
+  { q: '简述人民群众在历史发展中的作用。', keywords: ['人民群众', '历史创造者', '社会物质财富', '社会精神财富', '社会变革', '决定力量'], ref: '人民群众是历史的创造者。人民群众是社会物质财富的创造者，是社会精神财富的创造者，是社会变革的决定力量。坚持人民群众是历史创造者的原理，就要坚持党的群众观点和群众路线，一切为了群众，一切依靠群众。' },
+  { q: '简述如何推动高质量发展。', keywords: ['高质量发展', '新发展理念', '供给侧改革', '创新驱动', '实体经济', '现代化经济体系'], ref: '推动高质量发展，必须完整、准确、全面贯彻新发展理念。要坚持以供给侧结构性改革为主线，把发展经济的着力点放在实体经济上，加快建设现代化经济体系。要坚持创新驱动发展战略，推进科技自立自强，增强发展的安全性和可持续性。' },
+];
+
 function getDailyQuizIndices() {
   const today = getToday();
   if (DATA.pol.lastQuizDate === today && DATA.pol.quizIndices.length > 0) {
@@ -1201,7 +1225,7 @@ function getDailyQuizIndices() {
   }
   const pool = [...Array(politicsQuiz.length).keys()];
   const indices = [];
-  while (indices.length < 5) {
+  while (indices.length < 15) {
     const r = Math.floor(Math.random() * pool.length);
     if (!indices.includes(pool[r])) indices.push(pool[r]);
   }
@@ -1219,6 +1243,7 @@ function renderPolitics() {
   document.getElementById('pol-wrong-count').textContent = DATA.pol.wrongBook.length;
   renderPoliticsHotspot();
   renderPoliticsQuiz();
+  renderShortAnswer();
 }
 
 function renderPoliticsQuiz() {
@@ -1304,6 +1329,74 @@ function selectPolOption(el, qi, oi, quizIdx) {
     document.getElementById('pol-wrong-count').textContent = DATA.pol.wrongBook.length;
     persist();
   }
+}
+
+// ==================== 每日简答题 ====================
+function getDailyShortAnswer() {
+  const today = getToday();
+  if (DATA.pol.shortAnswerIndex >= 0 && DATA.pol.lastQuizDate === today) {
+    return DATA.pol.shortAnswerIndex;
+  }
+  const idx = Math.floor(Math.random() * polShortAnswerBank.length);
+  DATA.pol.shortAnswerIndex = idx;
+  DATA.pol.shortAnswerText = '';
+  DATA.pol.shortAnswerSubmitted = false;
+  persist();
+  return idx;
+}
+
+function renderShortAnswer() {
+  const idx = getDailyShortAnswer();
+  const q = polShortAnswerBank[idx];
+  const submitted = DATA.pol.shortAnswerSubmitted;
+  const userText = DATA.pol.shortAnswerText || '';
+
+  let html = '<div style="margin-bottom:12px;font-size:15px;font-weight:600;line-height:1.7;">' + q.q + '</div>';
+  
+  if (!submitted) {
+    html += '<textarea id="pol-sa-input" style="width:100%;min-height:120px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:14px;line-height:1.7;resize:vertical;" placeholder="请输入你的答案...">' + userText + '</textarea>';
+    html += '<div class="mt-sm"><button class="btn btn-sm" onclick="submitShortAnswer()">📝 提交答案</button></div>';
+  } else {
+    // 自动批改：关键词匹配
+    const keywords = q.keywords || [];
+    const lowerAnswer = userText.toLowerCase();
+    const matched = keywords.filter(k => lowerAnswer.includes(k.toLowerCase()));
+    const score = keywords.length > 0 ? Math.round(matched.length / keywords.length * 100) : 0;
+    const grade = score >= 70 ? '优秀' : score >= 40 ? '良好' : '需加强';
+    const gradeColor = score >= 70 ? 'var(--success)' : score >= 40 ? 'var(--warning)' : 'var(--danger)';
+    
+    html += '<div style="background:var(--bg);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;border:1px solid var(--border);">';
+    html += '<div class="text-sm text-muted mb-sm">你的答案：</div>';
+    html += '<div style="font-size:14px;line-height:1.7;">' + userText.replace(/\n/g, '<br>') + '</div></div>';
+    
+    html += '<div style="background:rgba(56,189,248,0.06);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;border:1px solid rgba(56,189,248,0.2);">';
+    html += '<div class="text-sm text-muted mb-sm">📖 参考答案：</div>';
+    html += '<div style="font-size:14px;line-height:1.8;">' + q.ref + '</div></div>';
+    
+    html += '<div style="font-size:14px;margin-bottom:8px;">';
+    html += '<span style="color:' + gradeColor + ';font-weight:700;">评分：' + grade + '（' + score + '%）</span>';
+    html += '<span class="text-sm text-muted" style="margin-left:8px;">关键词匹配：' + matched.length + '/' + keywords.length + '</span></div>';
+    
+    // 显示关键词匹配情况
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">';
+    keywords.forEach(k => {
+      const hit = lowerAnswer.includes(k.toLowerCase());
+      html += '<span style="padding:2px 8px;border-radius:4px;font-size:12px;' + (hit ? 'background:rgba(74,222,128,0.15);color:var(--success);' : 'background:rgba(248,113,113,0.1);color:var(--danger);') + '">' + (hit ? '✅ ' : '❌ ') + k + '</span>';
+    });
+    html += '</div>';
+  }
+  
+  document.getElementById('pol-shortanswer').innerHTML = html;
+}
+
+function submitShortAnswer() {
+  const text = document.getElementById('pol-sa-input').value.trim();
+  if (!text) { toast('请先输入答案再提交！'); return; }
+  DATA.pol.shortAnswerText = text;
+  DATA.pol.shortAnswerSubmitted = true;
+  persist();
+  renderShortAnswer();
+  toast('答案已提交，自动批改完成！✅');
 }
 
 function switchPoliticsTab(tab) {
