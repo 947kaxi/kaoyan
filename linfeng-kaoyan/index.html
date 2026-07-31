@@ -13,10 +13,9 @@
 <title>林枫的考研预备间</title>
 <script>
 if ('serviceWorker' in navigator) {
+  // 彻底移除 Service Worker，避免缓存问题
   navigator.serviceWorker.getRegistrations().then(function(regs) {
     regs.forEach(function(r) { r.unregister(); });
-  }).then(function() {
-    navigator.serviceWorker.register('/linfeng-kaoyan/sw.js').catch(function(){});
   });
 }
 </script>
