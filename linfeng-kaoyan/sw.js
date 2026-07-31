@@ -1,4 +1,4 @@
-var CACHE = 'linfeng-kaoyan-v1';
+var CACHE = 'linfeng-kaoyan-v2';
 var URLS = [
   '/linfeng-kaoyan/',
   '/linfeng-kaoyan/index.html',
