@@ -560,13 +560,21 @@ function toast(msg) {
 document.querySelectorAll('nav a[data-page]').forEach(a => {
   a.addEventListener('click', function(e) {
     e.preventDefault();
-    document.querySelectorAll('nav a[data-page]').forEach(x => x.classList.remove('active'));
-    this.classList.add('active');
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + this.dataset.page).classList.add('active');
-    renderPage(this.dataset.page);
+    const page = this.dataset.page;
+    switchPage(page);
+    location.hash = page;
   });
 });
+
+function switchPage(page) {
+  document.querySelectorAll('nav a[data-page]').forEach(x => x.classList.remove('active'));
+  const navLink = document.querySelector('nav a[data-page="' + page + '"]');
+  if (navLink) navLink.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  renderPage(page);
+}
 
 function renderPage(name) {
   switch(name) {
@@ -1220,7 +1228,7 @@ const polShortAnswerBank = [
 
 function getDailyQuizIndices() {
   const today = getToday();
-  if (DATA.pol.lastQuizDate === today && DATA.pol.quizIndices.length > 0) {
+  if (DATA.pol.lastQuizDate === today && DATA.pol.quizIndices.length === 15) {
     return DATA.pol.quizIndices;
   }
   const pool = [...Array(politicsQuiz.length).keys()];
@@ -2405,7 +2413,19 @@ function resetTheme() {
 loadTheme();
 updateDateTime();
 setInterval(updateDateTime, 60000);
-renderDashboard();
+
+// 从 URL hash 恢复页面，没有 hash 则默认仪表盘
+var initPage = (location.hash || '#dashboard').replace('#', '');
+var validPages = ['dashboard','english','politics','art336','prof998','teacher','review','data'];
+if (validPages.indexOf(initPage) === -1) initPage = 'dashboard';
+switchPage(initPage);
+location.hash = initPage;
+
+// 监听 hash 变化（浏览器前进后退）
+window.addEventListener('hashchange', function() {
+  var p = (location.hash || '#dashboard').replace('#', '');
+  if (validPages.indexOf(p) >= 0) switchPage(p);
+});
 </script>
 </body>
 </html>
