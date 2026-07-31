@@ -483,6 +483,7 @@ function getDefaultData() {
       todayWordIndices: [], wordStatus: {},
       reviewQueue: [], translationIndex: 0,
       wordDone: false, translationText: '',
+      lastTransDate: '', translationRating: null,
     },
     pol: {
       quizIndices: [], wrongBook: [],
@@ -1077,12 +1078,19 @@ function renderEnglish() {
     document.getElementById('eng-words-status').innerHTML = '<span class="text-sm text-muted">剩余 ' + indices.filter(i => status[i] === undefined).length + ' 个单词待标记</span>';
   }
 
-  // Translation
-  if (DATA.eng.lastStudyDate !== getToday()) {
+  // Translation — 用独立的日期字段判断是否换题
+  if (DATA.eng.lastTransDate !== getToday()) {
     DATA.eng.translationIndex = Math.floor(Math.random() * translationBank.length);
+    DATA.eng.translationText = ''; // 新的一天，清除昨天的翻译
+    DATA.eng.translationRating = null; // 新的一天，清除旧评分
+    DATA.eng.lastTransDate = getToday();
+    persist();
   }
   const t = translationBank[DATA.eng.translationIndex];
   const savedTrans = DATA.eng.translationText || '';
+  // 检查之前是否有评分
+  const savedRating = DATA.eng.translationRating;
+  const hasRating = savedRating && savedRating.index === DATA.eng.translationIndex;
   document.getElementById('eng-translation').innerHTML =
     '<div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;font-size:15px;line-height:1.7;border-left:3px solid var(--accent);">' + t.en + '</div>' +
     '<textarea id="eng-trans-input" placeholder="请输入你的翻译..." oninput="saveTransText()">' + savedTrans + '</textarea>' +
@@ -1090,13 +1098,13 @@ function renderEnglish() {
     '<button class="btn btn-sm" onclick="showTranslation()">📖 查看参考译文</button>' +
     '<button class="btn btn-sm btn-ghost" onclick="nextTranslation()">🔄 换一题</button>' +
     '</div>' +
-    '<div id="eng-trans-answer" style="display:none;margin-top:12px;padding:14px;background:rgba(74,222,128,0.08);border-radius:var(--radius-sm);border-left:3px solid var(--success);font-size:14px;line-height:1.7;"></div>' +
-    '<div id="eng-trans-selfrate" style="display:none;margin-top:8px;" class="flex-row gap-sm">' +
+    '<div id="eng-trans-answer" style="display:' + (hasRating ? 'block' : 'none') + ';margin-top:12px;padding:14px;background:rgba(74,222,128,0.08);border-radius:var(--radius-sm);border-left:3px solid var(--success);font-size:14px;line-height:1.7;">' + (hasRating ? '<strong>参考译文：</strong><br>' + t.zh : '') + '</div>' +
+    '<div id="eng-trans-selfrate" style="display:' + (hasRating ? 'flex' : 'none') + ';margin-top:8px;" class="flex-row gap-sm">' +
     '<span class="text-sm text-muted">自评：</span>' +
     '<button class="btn btn-xs btn-danger" onclick="rateTranslation(0)">❌ 全错</button>' +
     '<button class="btn btn-xs btn-warning" onclick="rateTranslation(1)">🟠 部分对</button>' +
     '<button class="btn btn-xs btn-success" onclick="rateTranslation(2)">✅ 全对</button>' +
-    '<span id="eng-trans-rating" class="text-sm"></span></div>';
+    '<span id="eng-trans-rating" class="text-sm">' + (hasRating ? '<span style="color:' + ['var(--danger)','var(--warning)','var(--success)'][savedRating.score] + ';font-weight:600;">' + ['❌ 全错','🟠 部分正确','✅ 全对'][savedRating.score] + '</span>' : '') + '</span></div>';
 }
 
 function markWord(idx, status) {
@@ -1150,6 +1158,9 @@ function rateTranslation(score) {
   const labels = ['❌ 全错', '🟠 部分正确', '✅ 全对'];
   const colors = ['var(--danger)', 'var(--warning)', 'var(--success)'];
   document.getElementById('eng-trans-rating').innerHTML = '<span style="color:' + colors[score] + ';font-weight:600;">' + labels[score] + '</span>';
+  // 持久化评分
+  DATA.eng.translationRating = { score: score, index: DATA.eng.translationIndex };
+  persist();
   toast('已自评：' + labels[score]);
 }
 
