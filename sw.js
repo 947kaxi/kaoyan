@@ -1,4 +1,4 @@
-var CACHE = 'kaoyan-v3';
+var CACHE = 'kaoyan-v4';
 var URLS = [
   '/kaoyan/',
   '/kaoyan/index.html',
@@ -28,15 +28,14 @@ self.addEventListener('activate', function(e) {
 self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(function(cached) {
-      var p = fetch(e.request).then(function(resp) {
-        if (resp && resp.status === 200) {
-          var clone = resp.clone();
-          caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
-        }
-        return resp;
-      });
-      return cached || p;
+    fetch(e.request).then(function(resp) {
+      if (resp && resp.status === 200) {
+        var clone = resp.clone();
+        caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
+      }
+      return resp;
+    }).catch(function() {
+      return caches.match(e.request);
     })
   );
 });
