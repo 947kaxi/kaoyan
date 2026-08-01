@@ -1091,13 +1091,14 @@ function renderEnglish() {
     document.getElementById('eng-words-status').innerHTML = '<span class="text-sm text-muted">剩余 ' + indices.filter(i => status[i] === undefined).length + ' 个单词待标记</span>';
   }
 
-  // Translation — 用独立的日期字段判断是否换题
-  if (DATA.eng.lastTransDate !== getToday()) {
+  // Translation — 每天换新题
+  var today = getToday();
+  if (!DATA.eng.lastTransDate || DATA.eng.lastTransDate !== today) {
     DATA.eng.translationIndex = Math.floor(Math.random() * translationBank.length);
-    DATA.eng.translationText = ''; // 新的一天，清除昨天的翻译
-    DATA.eng.translationRating = null; // 新的一天，清除旧评分
-    DATA.eng.lastTransDate = getToday();
-    persist();
+    DATA.eng.translationText = '';
+    DATA.eng.translationRating = null;
+    DATA.eng.lastTransDate = today;
+    saveData(DATA);
   }
   const t = translationBank[DATA.eng.translationIndex];
   const savedTrans = DATA.eng.translationText || '';
