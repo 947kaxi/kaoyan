@@ -1833,37 +1833,39 @@ function saveProf998Note() {
 
 // ==================== 教资面试 ====================
 const teacherStructBank = [
-  { q: '你为什么要当一名音乐老师？', a: '我选择当一名音乐老师，首先是因为我热爱音乐教育事业。音乐不仅是一门艺术，更是培养学生审美能力、创造力和情感表达能力的重要途径。我希望通过自己的专业知识和热情，激发学生对音乐的兴趣，帮助他们在音乐学习中获得快乐和成长。其次，我具备扎实的音乐专业基础和教学能力，能够胜任音乐教学工作。最后，我认为教师是一份充满意义的职业，能够见证学生的进步和成长，这本身就是一种幸福。' },
-  { q: '如果学生在音乐课上捣乱，你会怎么处理？', a: '面对学生在音乐课上捣乱的情况，我会采取以下措施：首先，保持冷静，用眼神或走近的方式给予提醒，尽量不打断正常教学。其次，如果行为持续，我会利用教学间隙与该生进行简短沟通，了解原因。课后我会单独找他谈话，以关心的态度了解他的想法，同时明确课堂纪律要求。我还会反思自己的教学是否足够吸引学生，调整教学方法增加趣味性和互动性。如果问题持续，我会与班主任和家长沟通，形成教育合力。' },
-  { q: '谈谈你对音乐核心素养的理解。', a: '音乐核心素养主要包括审美感知、艺术表现、创意实践和文化理解四个方面。审美感知是指学生对音乐艺术的感受、理解和鉴赏能力；艺术表现是指学生通过演唱、演奏等实践活动表达音乐的能力；创意实践强调学生的音乐创造力和即兴表达能力；文化理解是指学生理解音乐与历史、文化、社会生活的关系。这四个方面相互联系，共同构成音乐学科的核心素养体系。在教学中，我会通过丰富的音乐实践活动，全面提升学生的音乐核心素养。' },
-  { q: '如何在音乐教学中培养学生的审美能力？', a: '培养学生的音乐审美能力可以从以下几个方面入手：第一，精选优秀的音乐作品作为教学素材，让学生接触不同风格、不同时期的经典音乐；第二，引导学生从旋律、节奏、和声、音色等音乐要素入手，学会分析和感受音乐的美；第三，创设情境，让学生沉浸在音乐氛围中，激发情感共鸣；第四，鼓励学生表达自己对音乐的感受和理解，尊重个性化的审美体验；第五，将音乐与其他艺术形式相结合，拓展学生的审美视野。' },
-  { q: '如果你在课堂上唱错了一个音，学生指出了，你怎么办？', a: '面对这种情况，我会坦然承认错误，并感谢学生的细心指出。我会说"谢谢你的提醒，老师也是会犯错的，让我们一起重新来一遍正确的。"这样做既体现了教师的诚实和谦逊，也为学生树立了敢于承认错误的榜样。同时，我会把这个小插曲转化为教学契机，借机强调正确音准的重要性，甚至可以让全班同学一起来辨别和纠正，增加课堂互动。' },
-  { q: '如何在音乐课中照顾到不同音乐基础的学生？', a: '我会采用分层教学的方法。对于基础较弱的学生，我会设计更简单的音乐活动，如节奏模仿、简单的歌曲演唱，多给予鼓励和肯定，建立他们的信心；对于基础较好的学生，我会提供更具挑战性的任务，如多声部合唱、即兴创作、乐器演奏等，满足他们的学习需求。在课堂中我会灵活分组，让不同水平的学生互相帮助、共同进步。同时，我会关注每个学生的进步，用发展的眼光看待每个孩子。' },
-  { q: '你如何看待"没有教不好的学生，只有不会教的老师"这句话？', a: '这句话体现了教育者的责任感和对学生的信任，我认同其中的积极意义——教师应该不断反思和改进教学方法，不轻易放弃任何一个学生。但同时，我认为这句话也不能被绝对化理解。学生的成长受到家庭、社会、个人等多方面因素的影响，教师不是唯一变量。作为教师，我会尽最大努力帮助每一个学生，但也需要理性看待教育的复杂性，与家长、社会共同努力，为学生创造良好的成长环境。' },
-  { q: '谈谈音乐教育在素质教育中的地位和作用。', a: '音乐教育是素质教育的重要组成部分。首先，音乐教育能够培养学生的审美能力和艺术素养，丰富他们的精神世界；其次，音乐活动如合唱、合奏等能够培养学生的团队协作能力和社会交往能力；再次，音乐学习需要持之以恒的练习，能够锻炼学生的毅力和专注力；此外，音乐与数学、语言、历史等学科有着密切的联系，有助于促进学生的全面发展。可以说，没有音乐教育的素质教育是不完整的。' },
-  { q: '如果学校要取消音乐课改上文化课，你怎么看？', a: '我坚决反对这种做法。音乐课不是可有可无的"副科"，而是培养学生全面发展的重要课程。音乐教育能够提升学生的审美素养、创造力和情感表达能力，这些是文化课无法替代的。而且研究表明，音乐学习对大脑发育、记忆力、专注力都有积极影响，反而能促进其他学科的学习。如果学校确实面临课时压力，我会建议优化课程安排而非取消，比如提高课堂效率、开展音乐社团活动等，确保音乐教育不被边缘化。' },
-  { q: '你会如何设计一节高中音乐鉴赏课？', a: '我会按照"导入—聆听—分析—拓展—总结"的流程来设计。导入环节通过一个有趣的问题或一段视频吸引学生注意力；聆听环节让学生完整聆听音乐作品，获得整体感受；分析环节引导学生从旋律、节奏、和声、曲式等角度深入理解作品；拓展环节联系作品的时代背景、作曲家生平等，拓宽学生视野；最后总结回顾，并布置开放性的课后思考题。整个过程中我会注重学生的主动参与和自主表达，避免"满堂灌"。' },
-  { q: '学生说"我不喜欢音乐，音乐课没意思"，你怎么办？', a: '首先我会了解学生不喜欢音乐的具体原因——是之前有过不愉快的音乐学习经历，还是对目前的课程内容不感兴趣。然后我会尝试调整教学策略：了解学生平时喜欢听什么类型的音乐，从中找到切入点；设计更多互动性和参与感强的课堂活动；用学生熟悉的流行音乐作为桥梁，引导他们逐步接触更多元的音乐类型。我也会私下和这位学生聊聊，让他感受到老师的关心，慢慢建立对音乐课的兴趣。' },
-  { q: '在音乐课上如何有效运用多媒体技术？', a: '多媒体技术是音乐教学的有力辅助工具。我会合理运用：播放高清音视频素材让学生直观感受音乐的魅力；使用音乐软件展示乐谱、分析曲式结构；利用互动白板进行节奏游戏和音乐创作活动；通过网络资源拓展学生的音乐视野。但我会注意不过度依赖多媒体，不能让技术喧宾夺主——音乐课的核心永远是聆听、感受和实践，技术只是辅助手段。' },
-  { q: '谈谈你对"以美育人"的理解。', a: '"以美育人"是指通过美的教育来培养人、塑造人。在音乐教育中，这意味着不仅要教给学生音乐知识和技能，更要通过音乐之美来陶冶他们的情操、丰富他们的情感、提升他们的精神境界。具体来说，我会选择具有高度艺术价值和人文内涵的音乐作品作为教学内容；引导学生在音乐中感受美、发现美、创造美；将音乐教育与德育、智育有机结合，促进学生全面发展。"以美育人"的核心是让美成为教育的力量，让教育成为美的过程。' },
-  { q: '如果班级合唱比赛你们班没获奖，学生很失落，你怎么安慰？', a: '首先我会肯定全班同学的努力和付出，告诉他们"老师为你们的认真和团结感到骄傲"。然后我会引导大家回顾整个准备过程中收获的快乐和成长——比如团队合作、音乐技能的提升等，这些比名次更珍贵。我还会播放比赛录像，让大家看到自己的进步和闪光点。最后我会和学生一起总结经验，讨论下次如何做得更好。关键是要让学生明白：比赛的真正意义不在于输赢，而在于过程中的成长和体验。' },
-  { q: '你认为高中音乐教师最重要的素质是什么？', a: '我认为高中音乐教师最重要的素质包括：第一，扎实的专业功底——这是教学的基础，包括演唱、演奏、音乐理论等方面的能力；第二，热爱教育和热爱学生——只有真心热爱，才能投入热情和精力；第三，良好的沟通和课堂管理能力——高中生的独立意识强，需要教师善于引导而非强制；第四，持续学习的能力——音乐和教育都在不断发展，教师需要不断更新知识和教学方法；第五，人格魅力——音乐教师的气质和修养本身就是一种教育力量。' },
+  { q: '你为什么要当一名音乐老师？', a: '我选择当一名音乐老师，首先是因为我热爱音乐教育事业。音乐不仅是一门艺术，更是培养学生审美能力、创造力和情感表达能力的重要途径。我希望通过自己的专业知识和热情，激发学生对音乐的兴趣，帮助他们在音乐学习中获得快乐和成长。其次，我具备扎实的音乐专业基础和教学能力，能够胜任音乐教学工作。最后，我认为教师是一份充满意义的职业，能够见证学生的进步和成长，这本身就是一种幸福。', keywords: ['热爱', '音乐教育', '审美', '专业', '教学', '幸福', '学生', '成长'] },
+  { q: '如果学生在音乐课上捣乱，你会怎么处理？', a: '面对学生在音乐课上捣乱的情况，我会采取以下措施：首先，保持冷静，用眼神或走近的方式给予提醒，尽量不打断正常教学。其次，如果行为持续，我会利用教学间隙与该生进行简短沟通，了解原因。课后我会单独找他谈话，以关心的态度了解他的想法，同时明确课堂纪律要求。我还会反思自己的教学是否足够吸引学生，调整教学方法增加趣味性和互动性。如果问题持续，我会与班主任和家长沟通，形成教育合力。', keywords: ['冷静', '提醒', '沟通', '了解', '反思', '教学方法', '家长', '班主任'] },
+  { q: '谈谈你对音乐核心素养的理解。', a: '音乐核心素养主要包括审美感知、艺术表现、创意实践和文化理解四个方面。审美感知是指学生对音乐艺术的感受、理解和鉴赏能力；艺术表现是指学生通过演唱、演奏等实践活动表达音乐的能力；创意实践强调学生的音乐创造力和即兴表达能力；文化理解是指学生理解音乐与历史、文化、社会生活的关系。这四个方面相互联系，共同构成音乐学科的核心素养体系。在教学中，我会通过丰富的音乐实践活动，全面提升学生的音乐核心素养。', keywords: ['审美感知', '艺术表现', '创意实践', '文化理解', '演唱', '演奏', '创造', '教学'] },
+  { q: '如何在音乐教学中培养学生的审美能力？', a: '培养学生的音乐审美能力可以从以下几个方面入手：第一，精选优秀的音乐作品作为教学素材，让学生接触不同风格、不同时期的经典音乐；第二，引导学生从旋律、节奏、和声、音色等音乐要素入手，学会分析和感受音乐的美；第三，创设情境，让学生沉浸在音乐氛围中，激发情感共鸣；第四，鼓励学生表达自己对音乐的感受和理解，尊重个性化的审美体验；第五，将音乐与其他艺术形式相结合，拓展学生的审美视野。', keywords: ['作品', '经典', '旋律', '节奏', '和声', '情境', '情感', '审美', '表达'] },
+  { q: '如果你在课堂上唱错了一个音，学生指出了，你怎么办？', a: '面对这种情况，我会坦然承认错误，并感谢学生的细心指出。我会说"谢谢你的提醒，老师也是会犯错的，让我们一起重新来一遍正确的。"这样做既体现了教师的诚实和谦逊，也为学生树立了敢于承认错误的榜样。同时，我会把这个小插曲转化为教学契机，借机强调正确音准的重要性，甚至可以让全班同学一起来辨别和纠正，增加课堂互动。', keywords: ['承认', '错误', '感谢', '诚实', '榜样', '音准', '互动', '教学'] },
+  { q: '如何在音乐课中照顾到不同音乐基础的学生？', a: '我会采用分层教学的方法。对于基础较弱的学生，我会设计更简单的音乐活动，如节奏模仿、简单的歌曲演唱，多给予鼓励和肯定，建立他们的信心；对于基础较好的学生，我会提供更具挑战性的任务，如多声部合唱、即兴创作、乐器演奏等，满足他们的学习需求。在课堂中我会灵活分组，让不同水平的学生互相帮助、共同进步。同时，我会关注每个学生的进步，用发展的眼光看待每个孩子。', keywords: ['分层', '基础', '鼓励', '信心', '挑战', '合唱', '创作', '分组', '进步'] },
+  { q: '你如何看待"没有教不好的学生，只有不会教的老师"这句话？', a: '这句话体现了教育者的责任感和对学生的信任，我认同其中的积极意义——教师应该不断反思和改进教学方法，不轻易放弃任何一个学生。但同时，我认为这句话也不能被绝对化理解。学生的成长受到家庭、社会、个人等多方面因素的影响，教师不是唯一变量。作为教师，我会尽最大努力帮助每一个学生，但也需要理性看待教育的复杂性，与家长、社会共同努力，为学生创造良好的成长环境。', keywords: ['责任', '信任', '反思', '方法', '放弃', '家庭', '社会', '理性', '环境'] },
+  { q: '谈谈音乐教育在素质教育中的地位和作用。', a: '音乐教育是素质教育的重要组成部分。首先，音乐教育能够培养学生的审美能力和艺术素养，丰富他们的精神世界；其次，音乐活动如合唱、合奏等能够培养学生的团队协作能力和社会交往能力；再次，音乐学习需要持之以恒的练习，能够锻炼学生的毅力和专注力；此外，音乐与数学、语言、历史等学科有着密切的联系，有助于促进学生的全面发展。可以说，没有音乐教育的素质教育是不完整的。', keywords: ['审美', '艺术', '精神', '合唱', '团队', '毅力', '专注', '全面', '素质'] },
+  { q: '如果学校要取消音乐课改上文化课，你怎么看？', a: '我坚决反对这种做法。音乐课不是可有可无的"副科"，而是培养学生全面发展的重要课程。音乐教育能够提升学生的审美素养、创造力和情感表达能力，这些是文化课无法替代的。而且研究表明，音乐学习对大脑发育、记忆力、专注力都有积极影响，反而能促进其他学科的学习。如果学校确实面临课时压力，我会建议优化课程安排而非取消，比如提高课堂效率、开展音乐社团活动等，确保音乐教育不被边缘化。', keywords: ['反对', '全面发展', '审美', '创造', '情感', '大脑', '记忆', '专注', '优化'] },
+  { q: '你会如何设计一节高中音乐鉴赏课？', a: '我会按照"导入—聆听—分析—拓展—总结"的流程来设计。导入环节通过一个有趣的问题或一段视频吸引学生注意力；聆听环节让学生完整聆听音乐作品，获得整体感受；分析环节引导学生从旋律、节奏、和声、曲式等角度深入理解作品；拓展环节联系作品的时代背景、作曲家生平等，拓宽学生视野；最后总结回顾，并布置开放性的课后思考题。整个过程中我会注重学生的主动参与和自主表达，避免"满堂灌"。', keywords: ['导入', '聆听', '分析', '拓展', '总结', '旋律', '节奏', '曲式', '背景', '参与'] },
+  { q: '学生说"我不喜欢音乐，音乐课没意思"，你怎么办？', a: '首先我会了解学生不喜欢音乐的具体原因——是之前有过不愉快的音乐学习经历，还是对目前的课程内容不感兴趣。然后我会尝试调整教学策略：了解学生平时喜欢听什么类型的音乐，从中找到切入点；设计更多互动性和参与感强的课堂活动；用学生熟悉的流行音乐作为桥梁，引导他们逐步接触更多元的音乐类型。我也会私下和这位学生聊聊，让他感受到老师的关心，慢慢建立对音乐课的兴趣。', keywords: ['了解', '原因', '调整', '互动', '参与', '流行', '桥梁', '关心', '兴趣'] },
+  { q: '在音乐课上如何有效运用多媒体技术？', a: '多媒体技术是音乐教学的有力辅助工具。我会合理运用：播放高清音视频素材让学生直观感受音乐的魅力；使用音乐软件展示乐谱、分析曲式结构；利用互动白板进行节奏游戏和音乐创作活动；通过网络资源拓展学生的音乐视野。但我会注意不过度依赖多媒体，不能让技术喧宾夺主——音乐课的核心永远是聆听、感受和实践，技术只是辅助手段。', keywords: ['音视频', '乐谱', '曲式', '互动', '白板', '节奏', '创作', '网络', '聆听', '实践', '辅助'] },
+  { q: '谈谈你对"以美育人"的理解。', a: '"以美育人"是指通过美的教育来培养人、塑造人。在音乐教育中，这意味着不仅要教给学生音乐知识和技能，更要通过音乐之美来陶冶他们的情操、丰富他们的情感、提升他们的精神境界。具体来说，我会选择具有高度艺术价值和人文内涵的音乐作品作为教学内容；引导学生在音乐中感受美、发现美、创造美；将音乐教育与德育、智育有机结合，促进学生全面发展。"以美育人"的核心是让美成为教育的力量，让教育成为美的过程。', keywords: ['美', '培养', '塑造', '情操', '情感', '精神', '艺术', '人文', '感受', '发现', '创造', '全面'] },
+  { q: '如果班级合唱比赛你们班没获奖，学生很失落，你怎么安慰？', a: '首先我会肯定全班同学的努力和付出，告诉他们"老师为你们的认真和团结感到骄傲"。然后我会引导大家回顾整个准备过程中收获的快乐和成长——比如团队合作、音乐技能的提升等，这些比名次更珍贵。我还会播放比赛录像，让大家看到自己的进步和闪光点。最后我会和学生一起总结经验，讨论下次如何做得更好。关键是要让学生明白：比赛的真正意义不在于输赢，而在于过程中的成长和体验。', keywords: ['肯定', '努力', '团结', '骄傲', '回顾', '成长', '团队合作', '技能', '进步', '意义', '输赢'] },
+  { q: '你认为高中音乐教师最重要的素质是什么？', a: '我认为高中音乐教师最重要的素质包括：第一，扎实的专业功底——这是教学的基础，包括演唱、演奏、音乐理论等方面的能力；第二，热爱教育和热爱学生——只有真心热爱，才能投入热情和精力；第三，良好的沟通和课堂管理能力——高中生的独立意识强，需要教师善于引导而非强制；第四，持续学习的能力——音乐和教育都在不断发展，教师需要不断更新知识和教学方法；第五，人格魅力——音乐教师的气质和修养本身就是一种教育力量。', keywords: ['专业', '功底', '演唱', '演奏', '理论', '热爱', '学生', '沟通', '管理', '学习', '人格', '魅力'] },
 ];
 
 function getDailyStructIndices() {
-  const today = getToday();
-  if (DATA.teacher.lastStructDate === today && DATA.teacher.structIndices.length > 0) {
+  var today = getToday();
+  if (DATA.teacher.lastStructDate === today && DATA.teacher.structIndices.length === 3) {
     return DATA.teacher.structIndices;
   }
-  const pool = [...Array(teacherStructBank.length).keys()];
-  const indices = [];
+  var pool = [...Array(teacherStructBank.length).keys()];
+  var indices = [];
   while (indices.length < 3) {
-    const r = Math.floor(Math.random() * pool.length);
+    var r = Math.floor(Math.random() * pool.length);
     if (!indices.includes(pool[r])) indices.push(pool[r]);
   }
   DATA.teacher.structIndices = indices;
   DATA.teacher.lastStructDate = today;
-  persist();
+  DATA.teacher.structAnswers = {};
+  DATA.teacher.structSubmitted = {};
+  saveData(DATA);
   return indices;
 }
 
@@ -1890,20 +1892,53 @@ function renderTeacher() {
     '<div class="mt-sm"><button class="btn btn-sm" onclick="saveSpeechNote()">💾 保存说课记录</button></div>';
 
   // 结构化问题
-  const structIndices = getDailyStructIndices();
-  document.getElementById('teacher-struct').innerHTML = structIndices.map((si, i) => {
-    const item = teacherStructBank[si];
-    return '<div class="recite-card">' +
-      '<div class="question">第' + (i+1) + '题：' + item.q + '</div>' +
-      '<button class="btn btn-sm btn-outline mb-sm" onclick="showStructAnswer(' + i + ')">💡 显示参考答案</button>' +
-      '<div class="answer" id="struct-answer-' + i + '">' + item.a + '</div>' +
-      '<div id="struct-selfrate-' + i + '" style="display:none;margin-top:8px;" class="flex-row gap-sm">' +
-      '<span class="text-sm text-muted">自评：</span>' +
-      '<button class="btn btn-xs btn-danger" onclick="rateStruct(' + i + ',0)">❌ 全错</button>' +
-      '<button class="btn btn-xs btn-warning" onclick="rateStruct(' + i + ',1)">🟠 部分对</button>' +
-      '<button class="btn btn-xs btn-success" onclick="rateStruct(' + i + ',2)">✅ 全对</button>' +
-      '<span id="struct-rating-' + i + '" class="text-sm"></span></div>' +
-      '</div>';
+  // 结构化问题 — 每日3题，输入答案自动批改
+  var structIndices = getDailyStructIndices();
+  if (!DATA.teacher.structAnswers) DATA.teacher.structAnswers = {};
+  if (!DATA.teacher.structSubmitted) DATA.teacher.structSubmitted = {};
+  
+  document.getElementById('teacher-struct').innerHTML = structIndices.map(function(si, i) {
+    var item = teacherStructBank[si];
+    var submitted = DATA.teacher.structSubmitted[i] || false;
+    var userText = DATA.teacher.structAnswers[i] || '';
+    
+    var html = '<div class="recite-card">' +
+      '<div class="question">第' + (i+1) + '题：' + item.q + '</div>';
+    
+    if (!submitted) {
+      html += '<textarea id="struct-input-' + i + '" style="width:100%;min-height:100px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-size:14px;line-height:1.6;resize:vertical;" placeholder="请输入你的答案...">' + userText + '</textarea>';
+      html += '<div class="mt-sm"><button class="btn btn-sm btn-success" onclick="submitStruct(' + i + ')">📝 提交批改</button></div>';
+    } else {
+      // 已提交：显示自动批改结果
+      var keywords = item.keywords || [];
+      var lowerAns = userText.toLowerCase();
+      var matched = keywords.filter(function(k){ return lowerAns.indexOf(k.toLowerCase()) >= 0; });
+      var score = keywords.length > 0 ? Math.round(matched.length / keywords.length * 100) : 0;
+      var grade = score >= 70 ? '优秀' : score >= 40 ? '良好' : '需加强';
+      var color = score >= 70 ? 'var(--success)' : score >= 40 ? 'var(--warning)' : 'var(--danger)';
+      
+      html += '<div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;border:1px solid var(--border);">';
+      html += '<div class="text-sm text-muted mb-sm">你的答案：</div>';
+      html += '<div style="font-size:14px;line-height:1.7;">' + userText.replace(/\n/g, '<br>') + '</div></div>';
+      
+      html += '<div style="background:rgba(56,189,248,0.06);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;border:1px solid rgba(56,189,248,0.2);">';
+      html += '<div class="text-sm text-muted mb-sm">📖 参考答案：</div>';
+      html += '<div style="font-size:14px;line-height:1.8;">' + item.a + '</div></div>';
+      
+      html += '<div style="font-size:14px;margin-bottom:6px;">';
+      html += '<span style="color:' + color + ';font-weight:700;">评分：' + grade + '（' + score + '%）</span>';
+      html += '<span class="text-sm text-muted" style="margin-left:8px;">关键词匹配：' + matched.length + '/' + keywords.length + '</span></div>';
+      
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      keywords.forEach(function(k){
+        var hit = lowerAns.indexOf(k.toLowerCase()) >= 0;
+        html += '<span style="padding:2px 8px;border-radius:4px;font-size:12px;' + (hit ? 'background:rgba(74,222,128,0.15);color:var(--success);' : 'background:rgba(248,113,113,0.1);color:var(--danger);') + '">' + (hit ? '✅ ' : '❌ ') + k + '</span>';
+      });
+      html += '</div>';
+    }
+    
+    html += '</div>';
+    return html;
   }).join('') + '<div class="mt-sm"><button class="btn btn-sm btn-ghost" onclick="refreshStruct()">🔄 换一组题</button></div>';
 }
 
@@ -1932,22 +1967,24 @@ function saveSpeechNote() {
   toast('说课记录已保存！🗣️');
 }
 
-function showStructAnswer(i) {
-  document.getElementById('struct-answer-' + i).classList.add('show');
-  document.getElementById('struct-selfrate-' + i).style.display = 'flex';
-}
-
-function rateStruct(i, score) {
-  const labels = ['❌ 全错', '🟠 部分正确', '✅ 全对'];
-  const colors = ['var(--danger)', 'var(--warning)', 'var(--success)'];
-  document.getElementById('struct-rating-' + i).innerHTML = '<span style="color:' + colors[score] + ';font-weight:600;">' + labels[score] + '</span>';
-  toast('已自评：' + labels[score]);
+function submitStruct(i) {
+  var text = document.getElementById('struct-input-' + i).value.trim();
+  if (!text) { toast('请先输入答案再提交！'); return; }
+  if (!DATA.teacher.structAnswers) DATA.teacher.structAnswers = {};
+  if (!DATA.teacher.structSubmitted) DATA.teacher.structSubmitted = {};
+  DATA.teacher.structAnswers[i] = text;
+  DATA.teacher.structSubmitted[i] = true;
+  saveData(DATA);
+  renderTeacher();
+  toast('答案已提交，自动批改完成！✅');
 }
 
 function refreshStruct() {
   DATA.teacher.structIndices = [];
   DATA.teacher.lastStructDate = '';
-  persist();
+  DATA.teacher.structAnswers = {};
+  DATA.teacher.structSubmitted = {};
+  saveData(DATA);
   renderTeacher();
 }
 
