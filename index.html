@@ -1100,10 +1100,15 @@ function renderEnglish() {
     DATA.eng.lastTransDate = today;
     saveData(DATA);
   }
+  // 清除旧版自评数据（score为0/1/2的旧格式）
+  if (DATA.eng.translationRating && DATA.eng.translationRating.score <= 2) {
+    DATA.eng.translationRating = null;
+    saveData(DATA);
+  }
   const t = translationBank[DATA.eng.translationIndex];
   const savedTrans = DATA.eng.translationText || '';
   const savedRating = DATA.eng.translationRating;
-  const hasRating = savedRating && savedRating.index === DATA.eng.translationIndex;
+  const hasRating = savedRating && savedRating.index === DATA.eng.translationIndex && savedRating.score > 2;
   document.getElementById('eng-translation').innerHTML =
     '<div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;font-size:15px;line-height:1.7;border-left:3px solid var(--accent);">' + t.en + '</div>' +
     '<textarea id="eng-trans-input" placeholder="请输入你的翻译..." oninput="saveTransText()"' + (hasRating ? ' disabled' : '') + '>' + savedTrans + '</textarea>' +
