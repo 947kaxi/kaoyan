@@ -809,8 +809,42 @@ let timerState = {
   running: false,
   subject: 'politics',
   seconds: 0,
+  startTime: null,  // 计时开始的毫秒时间戳
   intervalId: null,
 };
+
+// 从 localStorage 恢复计时器状态
+function restoreTimer() {
+  var saved = localStorage.getItem('kaxi_timer_state');
+  if (saved) {
+    try {
+      var s = JSON.parse(saved);
+      timerState.subject = s.subject || 'politics';
+      timerState.seconds = s.seconds || 0;
+      timerState.running = s.running || false;
+      timerState.startTime = s.startTime || null;
+      // 如果之前在运行，计算已经过去的时间
+      if (timerState.running && timerState.startTime) {
+        var elapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
+        timerState.seconds += elapsed;
+        // 重启 interval
+        timerState.intervalId = setInterval(function() {
+          timerState.seconds++;
+          updateTimerDisplay();
+        }, 1000);
+      }
+    } catch(e) {}
+  }
+}
+
+function saveTimerState() {
+  localStorage.setItem('kaxi_timer_state', JSON.stringify({
+    running: timerState.running,
+    subject: timerState.subject,
+    seconds: timerState.seconds,
+    startTime: timerState.startTime,
+  }));
+}
 
 function renderTimerUI() {
   // 科目选择按钮
@@ -818,6 +852,19 @@ function renderTimerUI() {
     '<button class="sbj-btn' + (timerState.subject === s.key ? ' active' : '') +
     '" onclick="switchTimerSubject(\'' + s.key + '\')">' + s.icon + ' ' + s.name + '</button>'
   ).join('');
+
+  // 恢复按钮状态
+  var startBtn = document.getElementById('timer-btn-start');
+  var pauseBtn = document.getElementById('timer-btn-pause');
+  if (startBtn && pauseBtn) {
+    if (timerState.running) {
+      startBtn.style.display = 'none';
+      pauseBtn.style.display = 'inline-flex';
+    } else {
+      startBtn.style.display = 'inline-flex';
+      pauseBtn.style.display = 'none';
+    }
+  }
 
   // 时间显示
   updateTimerDisplay();
@@ -851,31 +898,45 @@ function updateTimerDisplay() {
 }
 
 function switchTimerSubject(key) {
+  // 如果正在计时，先保存当前科目的时间
+  if (timerState.running && timerState.seconds > 0) {
+    var today = getToday();
+    if (!DATA.timerLogs) DATA.timerLogs = {};
+    if (!DATA.timerLogs[today]) DATA.timerLogs[today] = {};
+    DATA.timerLogs[today][timerState.subject] = (DATA.timerLogs[today][timerState.subject] || 0) + timerState.seconds;
+    persist();
+    timerState.seconds = 0;
+  }
   timerState.subject = key;
+  saveTimerState();
   renderTimerUI();
 }
 
 function timerStart() {
   if (timerState.running) return;
   timerState.running = true;
+  timerState.startTime = Date.now();
   document.getElementById('timer-btn-start').style.display = 'none';
   document.getElementById('timer-btn-pause').style.display = 'inline-flex';
-  timerState.intervalId = setInterval(() => {
+  timerState.intervalId = setInterval(function() {
     timerState.seconds++;
     updateTimerDisplay();
   }, 1000);
+  saveTimerState();
 }
 
 function timerPause() {
   if (!timerState.running) return;
   timerState.running = false;
+  timerState.startTime = null;
   clearInterval(timerState.intervalId);
   document.getElementById('timer-btn-start').style.display = 'inline-flex';
   document.getElementById('timer-btn-pause').style.display = 'none';
+  saveTimerState();
 }
 
 function timerStop() {
-  if (timerState.seconds === 0) return;
+  if (timerState.seconds === 0 && !timerState.running) return;
   timerPause();
   // Save to data
   const today = getToday();
@@ -885,6 +946,7 @@ function timerStop() {
   timerState.seconds = 0;
   updateTimerDisplay();
   persist();
+  saveTimerState();
   renderTimerUI();
   toast('已记录 ' + timerSubjects.find(s => s.key === timerState.subject).name + ' 专注时间！⏱️');
 }
@@ -893,6 +955,7 @@ function timerReset() {
   timerPause();
   timerState.seconds = 0;
   updateTimerDisplay();
+  saveTimerState();
 }
 
 // 手动补时：点击各科时间卡片弹出输入框
@@ -2612,6 +2675,7 @@ function resetTheme() {
 loadTheme();
 updateDateTime();
 setInterval(updateDateTime, 60000);
+restoreTimer(); // 恢复计时器状态
 
 // 从 URL hash 恢复页面，没有 hash 则默认仪表盘
 var initPage = (location.hash || '#dashboard').replace('#', '');
