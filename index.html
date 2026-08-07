@@ -808,42 +808,49 @@ const timerSubjects = [
 let timerState = {
   running: false,
   subject: 'politics',
-  seconds: 0,
-  startTime: null,  // 计时开始的毫秒时间戳
+  startTime: null,   // 计时开始的毫秒时间戳
+  accumulated: 0,    // 暂停前累计的秒数
   intervalId: null,
 };
 
 // 从 localStorage 恢复计时器状态
 function restoreTimer() {
   var saved = localStorage.getItem('kaxi_timer_state');
-  if (saved) {
-    try {
-      var s = JSON.parse(saved);
-      timerState.subject = s.subject || 'politics';
-      timerState.seconds = s.seconds || 0;
-      timerState.running = s.running || false;
-      timerState.startTime = s.startTime || null;
-      // 如果之前在运行，计算已经过去的时间
-      if (timerState.running && timerState.startTime) {
-        var elapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
-        timerState.seconds += elapsed;
-        // 重启 interval
-        timerState.intervalId = setInterval(function() {
-          timerState.seconds++;
-          updateTimerDisplay();
-        }, 1000);
-      }
-    } catch(e) {}
+  if (!saved) return;
+  try {
+    var s = JSON.parse(saved);
+    timerState.subject = s.subject || 'politics';
+    timerState.accumulated = s.accumulated || 0;
+    timerState.running = s.running || false;
+    timerState.startTime = s.startTime || null;
+    if (timerState.running && timerState.startTime) {
+      // 还在运行，重启 interval（只更新显示，不累加）
+      timerState.intervalId = setInterval(function() {
+        updateTimerDisplay();
+        saveTimerState();
+      }, 1000);
+    }
+  } catch(e) {}
+}
+
+// 获取当前累计秒数（实时计算，不靠变量累加）
+function getTimerSeconds() {
+  var secs = timerState.accumulated;
+  if (timerState.running && timerState.startTime) {
+    secs += Math.floor((Date.now() - timerState.startTime) / 1000);
   }
+  return secs;
 }
 
 function saveTimerState() {
-  localStorage.setItem('kaxi_timer_state', JSON.stringify({
+  // 保存时把当前运行中的秒数存入 accumulated，更新 startTime
+  var s = {
     running: timerState.running,
     subject: timerState.subject,
-    seconds: timerState.seconds,
+    accumulated: timerState.accumulated,
     startTime: timerState.startTime,
-  }));
+  };
+  localStorage.setItem('kaxi_timer_state', JSON.stringify(s));
 }
 
 function renderTimerUI() {
@@ -889,23 +896,28 @@ function renderTimerUI() {
 }
 
 function updateTimerDisplay() {
-  const s = timerState.seconds;
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  document.getElementById('timer-display').textContent =
-    String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  var s = getTimerSeconds();
+  var h = Math.floor(s / 3600);
+  var m = Math.floor((s % 3600) / 60);
+  var sec = s % 60;
+  var el = document.getElementById('timer-display');
+  if (el) el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
 }
 
 function switchTimerSubject(key) {
-  // 如果正在计时，先保存当前科目的时间
-  if (timerState.running && timerState.seconds > 0) {
-    var today = getToday();
-    if (!DATA.timerLogs) DATA.timerLogs = {};
-    if (!DATA.timerLogs[today]) DATA.timerLogs[today] = {};
-    DATA.timerLogs[today][timerState.subject] = (DATA.timerLogs[today][timerState.subject] || 0) + timerState.seconds;
-    persist();
-    timerState.seconds = 0;
+  // 如果正在计时，先把当前时间存入日志
+  if (timerState.running) {
+    var secs = getTimerSeconds();
+    if (secs > 0) {
+      var today = getToday();
+      if (!DATA.timerLogs) DATA.timerLogs = {};
+      if (!DATA.timerLogs[today]) DATA.timerLogs[today] = {};
+      DATA.timerLogs[today][timerState.subject] = (DATA.timerLogs[today][timerState.subject] || 0) + secs;
+      persist();
+    }
+    // 重置当前计时，开始新科目
+    timerState.accumulated = 0;
+    timerState.startTime = Date.now();
   }
   timerState.subject = key;
   saveTimerState();
@@ -918,15 +930,18 @@ function timerStart() {
   timerState.startTime = Date.now();
   document.getElementById('timer-btn-start').style.display = 'none';
   document.getElementById('timer-btn-pause').style.display = 'inline-flex';
+  // interval 只更新显示，不累加秒数
   timerState.intervalId = setInterval(function() {
-    timerState.seconds++;
     updateTimerDisplay();
+    saveTimerState();
   }, 1000);
   saveTimerState();
 }
 
 function timerPause() {
   if (!timerState.running) return;
+  // 把当前运行中的秒数存入 accumulated
+  timerState.accumulated = getTimerSeconds();
   timerState.running = false;
   timerState.startTime = null;
   clearInterval(timerState.intervalId);
@@ -936,24 +951,32 @@ function timerPause() {
 }
 
 function timerStop() {
-  if (timerState.seconds === 0 && !timerState.running) return;
-  timerPause();
-  // Save to data
+  var secs = getTimerSeconds();
+  if (secs === 0) return;
+  // 停止计时
+  timerState.running = false;
+  timerState.startTime = null;
+  timerState.accumulated = 0;
+  clearInterval(timerState.intervalId);
+  // 保存到日志
   const today = getToday();
   if (!DATA.timerLogs) DATA.timerLogs = {};
   if (!DATA.timerLogs[today]) DATA.timerLogs[today] = {};
-  DATA.timerLogs[today][timerState.subject] = (DATA.timerLogs[today][timerState.subject] || 0) + timerState.seconds;
-  timerState.seconds = 0;
-  updateTimerDisplay();
+  DATA.timerLogs[today][timerState.subject] = (DATA.timerLogs[today][timerState.subject] || 0) + secs;
   persist();
   saveTimerState();
+  updateTimerDisplay();
   renderTimerUI();
-  toast('已记录 ' + timerSubjects.find(s => s.key === timerState.subject).name + ' 专注时间！⏱️');
+  toast('已记录 ' + secs + ' 秒 / ' + Math.floor(secs/60) + ' 分钟 → ' + timerSubjects.find(s => s.key === timerState.subject).name + ' ⏱️');
 }
 
 function timerReset() {
-  timerPause();
-  timerState.seconds = 0;
+  timerState.running = false;
+  timerState.startTime = null;
+  timerState.accumulated = 0;
+  clearInterval(timerState.intervalId);
+  document.getElementById('timer-btn-start').style.display = 'inline-flex';
+  document.getElementById('timer-btn-pause').style.display = 'none';
   updateTimerDisplay();
   saveTimerState();
 }
